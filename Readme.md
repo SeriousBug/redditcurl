@@ -6,6 +6,7 @@ redditcurl can handle:
 * Direct image links
 * imgur links and albums
 * tumblr posts
+* RedditBooru galleries
 
 redditcurl is inspired from Adrian Espinosa (aesptux)'s download-reddit-saved-images script.
 His script supports more websites, and can be found at https://github.com/aesptux/download-reddit-saved-images.

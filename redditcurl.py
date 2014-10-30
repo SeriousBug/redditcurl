@@ -139,6 +139,25 @@ def tumblr_link(url, path, file_name=""):
     download(image["src"], path, file_name)
 
 
+def redditbooru_gallery(url, path, file_name=""):
+    """Download the images from a RedditBooru gallery.
+
+    Args:
+        url: A url to a RedditBooru gallery.
+        path: Path to the folder where the image should be saved.
+        file_name: File name to use when saving the images.
+            A number will be appended to the end of the name for
+            each image in the album.
+            If file_name is an empty string, the files will keep
+            the names they have on the server.
+    """
+    response = requests.get(url)
+    soup = BeautifulSoup(response.content)
+    images = soup.find_all("img")
+    for i, image in enumerate(images):
+        download(image["src"], path, "{}.{}".format(file_name, i + 1))
+
+
 def manage_download(url, path, file_name=""):
     """Decide on the function to download the image and handle errors.
 
@@ -168,6 +187,8 @@ def manage_download(url, path, file_name=""):
             imgur_link(url, path, file_name)
         elif "tumblr.com/post/" in url:
             tumblr_link(url, path, file_name)
+        elif "redditbooru.com/gallery/" in url:
+            redditbooru_gallery(url, path, file_name)
         else:  # Unrecognised website/file
             return url, False
         return url, True
