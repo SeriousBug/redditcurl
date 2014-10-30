@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
     redditcurl, download the images you saved on Reddit.
     Copyright (C) 2014  Kaan Genç
