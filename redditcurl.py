@@ -17,18 +17,37 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 import os
+import sys
 import argparse
 import tempfile
 import shutil
 import multiprocessing
+import gzip
 from zipfile import ZipFile
 import requests
 import praw
 from bs4 import BeautifulSoup
 
-IMAGE_FORMATS = ['bmp', 'dib', 'eps', 'ps', 'gif', 'im', 'jpg', 'jpe', 'jpeg',
+_IMAGE_FORMATS = ['bmp', 'dib', 'eps', 'ps', 'gif', 'im', 'jpg', 'jpe', 'jpeg',
                  'pcd', 'pcx', 'png', 'pbm', 'pgm', 'ppm', 'psd', 'tif',
                  'tiff', 'xbm', 'xpm', 'rgb', 'rast', 'svg']
+# Adding url attribute to avoid errors and ignore comments in filter_new
+praw.objects.Comment.url = ""
+# All file names will be translated according to _FILENAME_MAP, in order to remove characters
+# that can't be used as the file name.
+if sys.platform == "win32" or sys.platform == "cygwin":
+    _FILENAME_MAP = {ord("/"): None,
+                     ord("\\"): None,
+                     ord("?"): None,
+                     ord("*"): None,
+                     ord(":"): None,
+                     ord("|"): None,
+                     ord("\""): None,
+                     ord("<"): None,
+                     ord(">"): None
+                     }
+else:
+    _FILENAME_MAP = {ord("/"): None}
 
 
 def is_direct_image(url):
@@ -45,7 +64,7 @@ def is_direct_image(url):
         True if the string ends with a known image extension.
         False otherwise.
     """
-    if url.split('.')[-1] in IMAGE_FORMATS:
+    if url.split('.')[-1] in _IMAGE_FORMATS:
         return True
     return False
 
@@ -64,7 +83,7 @@ def download(url, path, file_name=""):
     """
     response = requests.get(url)
     if file_name == "":
-        base_name = url.split('/')[-1].split('.')[-1]
+        base_name = url.split('/')[-1].split('.')[0]
     else:
         base_name = file_name
     extension = response.headers["Content-Type"].split('/')[-1]
@@ -212,7 +231,9 @@ def download_submissions(submission_list, path, processes, use_titles=True):
         for sub in submission_list:
             if isinstance(sub, praw.objects.Submission):
                 if use_titles:
-                    download_queue.append((sub.url, path, sub.title))
+                    # Using lstrip on the title to ensure that unix-like OS'es don't hide the files.
+                    # Translate removes the characters that can't be used as file names.
+                    download_queue.append((sub.url, path, sub.title.lstrip(".").translate(_FILENAME_MAP)))
                 else:
                     download_queue.append((sub.url, path, ""))
     if processes > 1:
@@ -221,6 +242,42 @@ def download_submissions(submission_list, path, processes, use_titles=True):
     else:
         results = [manage_download(*submission) for submission in download_queue]
     return results
+
+
+def filter_new(submission_list, downloaded_file):
+    """Returns a list of images, removing the ones already saved.
+
+    Args:
+        submission_list: An iterable, containing praw.objects.Submission objects, or
+            any object that has .url attribute.
+        downloaded_file: Path to a .gz file, containing a list of downloaded pictures.
+            If the file doesn't exist, it will be created.
+
+    Returns:
+        A list of praw.objects.Submission, containing only the submissions that
+        haven't been downloaded yet.
+    """
+    try:
+        with gzip.open(downloaded_file) as file:
+            downloaded = file.read().decode("utf-8").split()
+    except (FileNotFoundError):
+        downloaded = []
+    # Comments have empty strings and url's, this will filter them as well
+    downloaded.append("")
+    filtered = [submission for submission in submission_list if submission.url not in downloaded]
+    return filtered
+
+
+def update_new(saved_list, downloaded_file):
+    """Adds the list of images to saved images file.
+
+    Args:
+        submission_list: An iterable, containing urls of saved images.
+        downloaded_file: Path to a .gz file, containing a list of downloaded images.
+            If the file doesn't exist, it will be created.
+    """
+    with gzip.open(downloaded_file, "ab") as file:
+        file.write(("\n".join(saved_list)).encode("utf-8"))
 
 
 def __main():
@@ -237,6 +294,8 @@ def __main():
     parser.add_argument("-n", "--notitles", action="store_true", default=False,
                         help="Do not use titles of submissions as file names, "
                              "use the names of downloaded files instead.")
+    parser.add_argument("-f", "--savefile", type=str, default=".downloaded.gz",
+                        help="The file to keep track of images that have been downloaded.")
     parser.add_argument("-r", "--remove", action="store_true", default=False,
                         help="Remove the files that were successfully downloaded from saved.")
     parser.add_argument("-s", "--silent", action="store_true", default=False,
@@ -252,12 +311,18 @@ def __main():
     r.login(username=args.username, password=args.password)
     prints("Logged in.")
     prints("Getting data...")
-    saved = r.user.get_saved(limit=None)
-    prints("Starting to download, using {} processes.".format(args.processes))
+    try:
+        os.makedirs(args.savedir)
+    except (FileExistsError):
+        pass
+    save_file = os.path.join(args.savedir, args.savefile)
+    saved = filter_new(r.user.get_saved(limit=None), save_file)
+    prints("Starting to download {} images, using {} processes.".format(len(saved), args.processes))
     downloaded = download_submissions(saved, args.savedir, args.processes, not args.notitles)
     prints("Processed {} urls.".format(len(downloaded)))
     success_count = 0
     fail_count = 0
+    successful_downloads = []
     for i, submission in enumerate(downloaded):
         url, successful = submission
         if not successful:
@@ -265,10 +330,16 @@ def __main():
             prints("Download failed: {}".format(url))
         else:  # successful
             success_count += 1
+            successful_downloads.append(url)
             if args.remove:
                 saved[i].unsave()
+    prints("Updating saved files list.")
+    update_new(successful_downloads, save_file)
     prints("\nDownloading finished.")
     prints("Successful: {} \t Failed: {}".format(success_count, fail_count))
 
 if __name__ == "__main__":
-    __main()
+    try:
+        __main()
+    except (praw.errors.InvalidUserPass):
+        print("Wrong password!")
