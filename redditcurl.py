@@ -19,18 +19,11 @@
 import os
 import sys
 import argparse
-import tempfile
-import shutil
 import multiprocessing
 import gzip
-from zipfile import ZipFile
-import requests
 import praw
-from bs4 import BeautifulSoup
+import websites
 
-_IMAGE_FORMATS = ['bmp', 'dib', 'eps', 'ps', 'gif', 'im', 'jpg', 'jpe', 'jpeg',
-                  'pcd', 'pcx', 'png', 'pbm', 'pgm', 'ppm', 'psd', 'tif',
-                  'tiff', 'xbm', 'xpm', 'rgb', 'rast', 'svg']
 # All file names will be translated according to _FILENAME_MAP, in order to remove characters
 # that can't be used as the file name.
 if sys.platform == "win32" or sys.platform == "cygwin":
@@ -48,141 +41,12 @@ else:
     _FILENAME_MAP = {ord("/"): None}
 
 
-def is_direct_image(url):
-    """Check if the given string leads to an image file.
-
-    The check is done by checking the extension at the end of the string,
-    No check is done to see if file (or page) actually exists, or if it
-    is really an image file.
-
-    Args:
-        url: A file path or url as string.
-
-    Returns:
-        True if the string ends with a known image extension.
-        False otherwise.
-    """
-    if url.split('.')[-1] in _IMAGE_FORMATS:
-        return True
-    return False
-
-
-def download(url, path, file_name=""):
-    """Download the file at url to path if it doesn't exist.
-
-    Correct file extension will be given based on the response header.
-    Byte mode is used for Windows.
-
-    Args:
-        url: A url to the file. Should start with http:// or https://.
-        path: Path to the folder where the file should be saved.
-        file_name: The file name to use when saving the file.
-            file_name is an empty string, then name of the downloaded file will be used.
-    """
-    response = requests.get(url)
-    if file_name == "":
-        base_name = url.split('/')[-1].split('.')[0]
-    else:
-        base_name = file_name
-    extension = response.headers["Content-Type"].split('/')[-1]
-    with open("{}/{}.{}".format(path, base_name, extension), mode="wb") as file:
-        file.write(response.content)
-
-
-def imgur_album(url, path, file_name=""):
-    """Download an album from imgur.
-
-    The album is downloaded as a zip archive and extracted to path.
-
-    Args:
-        url: A url to an imgur album.
-        path: Path to the folder where the images should be saved.
-        file_name: File name to use when saving the images.
-            A number will be appended to the end of the name for
-            each image in the album.
-            If file_name is an empty string, the files will keep
-            their names they had in the zip archive.
-    """
-    url = url.split('#')[0]  # If the album ends with an image index like /a/0ga2f#0, remove it
-    response = requests.get("{}/zip".format(url))
-    with tempfile.TemporaryFile(mode="w+b") as file:
-        file.write(response.content)
-        file.seek(0)
-        zipfile = ZipFile(file)
-        if file_name == "":
-            zipfile.extractall(path)
-        else:
-            tempdir = tempfile.mkdtemp()
-            zipfile.extractall(tempdir)
-            for i, image in enumerate(os.listdir(tempdir)):
-                extension = image.split('.')[-1]
-                shutil.copyfile("{}/{}".format(tempdir, image),
-                                "{}/{}.{}.{}".format(path, file_name, i + 1, extension))
-                # /home/user/images/myimg.1.png
-
-
-def imgur_link(url, path, file_name=""):
-    """Download the image from imgur link.
-
-    Args:
-        url: A url to an imgur image.
-        path: Path to the folder where the image should be saved.
-        file_name: File name to use when saving the image.
-            If file_name is an empty string, name of the downloaded file will be used.
-    """
-    download_name = url.split('/')[-1]
-    # The file extension doesn't have to be a .jpg,
-    # Imgur returns the image as long as it is requested with a known file extension.
-    # download function will correct the extension based on the headers.
-    download("https://i.imgur.com/{}.jpg".format(download_name), path, file_name)
-
-
-def tumblr_link(url, path, file_name=""):
-    """Download the image from a tumblr post.
-
-    This function assumes that there is only a single image in the tumblr post.
-    If the tumblr supports multiple images per post, only first will be downloaded.
-
-    Args:
-        url: A url to a tumblr post.
-        path: Path to the folder where the image should be saved.
-        file_name: File name to use when saving the image.
-            If file_name is an empty string, name of the downloaded file will be used.
-    """
-    response = requests.get(url)
-    soup = BeautifulSoup(response.content)
-    post_content = soup(attrs={"class": "post-content"})
-    image = BeautifulSoup(str(post_content)).find("img")
-    download(image["src"], path, file_name)
-
-
-def redditbooru_gallery(url, path, file_name=""):
-    """Download the images from a RedditBooru gallery.
-
-    Args:
-        url: A url to a RedditBooru gallery.
-        path: Path to the folder where the image should be saved.
-        file_name: File name to use when saving the images.
-            A number will be appended to the end of the name for
-            each image in the album.
-            If file_name is an empty string, the files will keep
-            the names they have on the server.
-    """
-    response = requests.get(url)
-    soup = BeautifulSoup(response.content)
-    images = soup.find_all("img")
-    for i, image in enumerate(images):
-        download(image["src"], path, "{}.{}".format(file_name, i + 1))
-
-
 def manage_download(url, path, file_name=""):
     """Decide on the function to download the image and handle errors.
 
     The function should not raise any errors unless it is critical.
     Failure to download the image or find a suitable method will only
     make the function return False.
-
-    To make new websites available, simply add them
 
     Args:
         url: A url to an image or images. Depending on the website,
@@ -196,19 +60,12 @@ def manage_download(url, path, file_name=""):
         Otherwise, False.
     """
     try:
-        if is_direct_image(url):
-            download(url, path, file_name)
-        elif "imgur.com/a" in url:
-            imgur_album(url, path, file_name)
-        elif "imgur.com/" in url:
-            imgur_link(url, path, file_name)
-        elif "tumblr.com/post/" in url:
-            tumblr_link(url, path, file_name)
-        elif "redditbooru.com/gallery/" in url:
-            redditbooru_gallery(url, path, file_name)
-        else:  # Unrecognised website/file
-            return url, False
-        return url, True
+        # websites module lists all supported downloaders under __all__
+        for downloader in websites.__all__:
+            if getattr(websites, downloader).match(url):
+                getattr(websites, downloader).download(url, path, file_name)
+                return url, True
+        return url, False
     except (OSError, IOError, AttributeError, IndexError):
         return url, False
 
@@ -313,10 +170,10 @@ def __main():
                         help="Reddit password.")
     parser.add_argument("-d", "--savedir", type=str, required=True,
                         help="Directory to save the images.")
-    parser.add_argument("-c", "--processes", type=int, default=5,
+    parser.add_argument("-c", "--processes", type=int, default=20,
                         help="Number of processes to use. "
                              "Use 1 to disable multiprocessing.")
-    parser.add_argument("-b", "--subfolders", action="store_true", default=True,
+    parser.add_argument("-b", "--subfolders", action="store_true", default=False,
                         help="Put the images into subfolders, based on their subreddits.")
     parser.add_argument("-t", "--subreddits", type=str, default="",
                         help="Only download from specific subreddits. Seperate names with commas (,).")
