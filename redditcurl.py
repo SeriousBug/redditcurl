@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
     redditcurl, download the images you saved on Reddit.
-    Copyright (C) 2014  Kaan Genç
+    Copyright (C) 2014, 2015  Kaan Genç
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -29,10 +29,8 @@ import praw
 from bs4 import BeautifulSoup
 
 _IMAGE_FORMATS = ['bmp', 'dib', 'eps', 'ps', 'gif', 'im', 'jpg', 'jpe', 'jpeg',
-                 'pcd', 'pcx', 'png', 'pbm', 'pgm', 'ppm', 'psd', 'tif',
-                 'tiff', 'xbm', 'xpm', 'rgb', 'rast', 'svg']
-# Adding url attribute to avoid errors and ignore comments in filter_new
-praw.objects.Comment.url = ""
+                  'pcd', 'pcx', 'png', 'pbm', 'pgm', 'ppm', 'psd', 'tif',
+                  'tiff', 'xbm', 'xpm', 'rgb', 'rast', 'svg']
 # All file names will be translated according to _FILENAME_MAP, in order to remove characters
 # that can't be used as the file name.
 if sys.platform == "win32" or sys.platform == "cygwin":
@@ -215,7 +213,7 @@ def manage_download(url, path, file_name=""):
         return url, False
 
 
-def download_submissions(submission_list, path, processes, use_titles=True):
+def download_submissions(submission_list, path, processes, use_titles=True, use_folders=True, only_from=[]):
     """Download all images in the submission_list to path.
 
     Args:
@@ -225,22 +223,49 @@ def download_submissions(submission_list, path, processes, use_titles=True):
         processes: Number of processes to use for searching and downloading.
         use_titles: If set to True, titles of the submissions will be used
             as file names for the downloaded images.
+        use_folders: If set to True, the images will be downloaded into folders
+            based on their subreddits.
+        only_from: If it is an empty list, then images from all subreddits will be downloaded.
+            Otherwise, only images from the subreddits in this list will be downloaded.
+
+    Returns:
+        A list of tuples, containing the url of the image and True if the image was successfully downloaded,
+        otherwise False.
     """
     download_queue = []
+    used_folders = set()
     if use_titles:
         for sub in submission_list:
-            if isinstance(sub, praw.objects.Submission):
+            if only_from == [] or sub.subreddit.display_name.casefold() in only_from:
                 if use_titles:
                     # Using lstrip on the title to ensure that unix-like OS'es don't hide the files.
                     # Translate removes the characters that can't be used as file names.
-                    download_queue.append((sub.url, path, sub.title.lstrip(".").translate(_FILENAME_MAP)))
+                    title = sub.title.lstrip(".").translate(_FILENAME_MAP)
                 else:
-                    download_queue.append((sub.url, path, ""))
+                    title = ""
+                if use_folders:
+                    folder = os.path.join(path, sub.subreddit.display_name)
+                    # Keep track of folders to create missing ones later
+                    used_folders.add(folder)
+                else:
+                    folder = path
+                download_queue.append((sub.url, folder, title))
+    for folder in used_folders:
+        try:
+            os.makedirs(folder)
+        except (FileExistsError):
+            pass
     if processes > 1:
         with multiprocessing.Pool(processes=processes) as pool:
             results = pool.starmap(manage_download, download_queue)
     else:
         results = [manage_download(*submission) for submission in download_queue]
+    # Remove empty folders that have been created
+    for folder in used_folders:
+        try:
+            os.removedirs(folder)
+        except (OSError):
+            pass
     return results
 
 
@@ -262,9 +287,9 @@ def filter_new(submission_list, downloaded_file):
             downloaded = file.read().decode("utf-8").split()
     except (FileNotFoundError):
         downloaded = []
-    # Comments have empty strings and url's, this will filter them as well
-    downloaded.append("")
-    filtered = [submission for submission in submission_list if submission.url not in downloaded]
+    # Filter to allow only new link posts
+    filtered = [submission for submission in submission_list
+                if hasattr(submission, "url") and submission.url not in downloaded]
     return filtered
 
 
@@ -291,6 +316,10 @@ def __main():
     parser.add_argument("-c", "--processes", type=int, default=5,
                         help="Number of processes to use. "
                              "Use 1 to disable multiprocessing.")
+    parser.add_argument("-b", "--subfolders", action="store_true", default=True,
+                        help="Put the images into subfolders, based on their subreddits.")
+    parser.add_argument("-t", "--subreddits", type=str, default="",
+                        help="Only download from specific subreddits. Seperate names with commas (,).")
     parser.add_argument("-n", "--notitles", action="store_true", default=False,
                         help="Do not use titles of submissions as file names, "
                              "use the names of downloaded files instead.")
@@ -305,7 +334,11 @@ def __main():
         prints = lambda x: None
     else:
         prints = print
-
+    if args.subreddits == "":
+        subreddits = []
+    else:
+        subreddits = args.subreddits.strip(',').casefold().split(',')
+        print("Downloading from {}".format(subreddits))
     r = praw.Reddit(user_agent="Just {} downloading some images".format(args.username))
     prints("Logging in as {}.".format(args.username))
     r.login(username=args.username, password=args.password)
@@ -317,8 +350,9 @@ def __main():
         pass
     save_file = os.path.join(args.savedir, args.savefile)
     saved = filter_new(r.user.get_saved(limit=None), save_file)
-    prints("Starting to download {} images, using {} processes.".format(len(saved), args.processes))
-    downloaded = download_submissions(saved, args.savedir, args.processes, not args.notitles)
+    prints("Starting to download, using {} processes.".format(args.processes))
+    downloaded = download_submissions(saved, args.savedir, args.processes,
+                                      not args.notitles, args.subfolders, subreddits)
     prints("Processed {} urls.".format(len(downloaded)))
     success_count = 0
     fail_count = 0
