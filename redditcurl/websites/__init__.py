@@ -15,15 +15,5 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
-import os
-import importlib
-
-__importpath__ = os.path.dirname(os.path.realpath(__file__))
-__all__ = [file[:-3] for file in os.listdir(__importpath__) if file[-3:] == ".py" and not file[:2] == "__"]
-
-for module in __all__:
-    try:
-        importlib.import_module(".{}".format(module), "websites")
-    except ImportError:
-        __all__.remove(module)
-        print("Unable to load module {}.".format(module))
+from . import direct, imgur_album, imgur_link, redditbooru_gallery, tumblr_link
+__all__ = [direct, imgur_album, imgur_link, redditbooru_gallery, tumblr_link]
