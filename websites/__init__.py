@@ -18,7 +18,8 @@
 import os
 import importlib
 
-__all__ = [file[:-3] for file in os.listdir("./websites/") if file[-3:] == ".py" and not file[:2] == "__"]
+__importpath__ = os.path.dirname(os.path.realpath(__file__))
+__all__ = [file[:-3] for file in os.listdir(__importpath__) if file[-3:] == ".py" and not file[:2] == "__"]
 
 for module in __all__:
     try:
