@@ -59,8 +59,8 @@ def manage_download(url, path, file_name=""):
     try:
         # websites module lists all supported downloaders under __all__
         for downloader in websites.__all__:
-            if getattr(websites, downloader).match(url):
-                getattr(websites, downloader).download(url, path, file_name)
+            if downloader.match(url):
+                downloader.download(url, path, file_name)
                 return url, True
         return url, False
     except (OSError, IOError, AttributeError, IndexError):
