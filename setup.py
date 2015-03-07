@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name="redditcurl",
-    version="0.1.1",
+    version="0.2.0",
     description="Download the images you saved on Reddit.",
     license="GPLv3",
     author="Kaan Genç",
@@ -12,9 +12,8 @@ setup(
     install_requires=["praw", "requests", "beautifulsoup4"],
     keywords=["reddit", "images", "download"],
     packages=["redditcurl", "redditcurl/websites"],
-    scripts=["redditcurl_main.py"],
     entry_points={
-        "console_scripts": ["redditcurl = redditcurl_main:__main__"]
+        "console_scripts": ["redditcurl = redditcurl:__main__"]
     },
     classifiers=[
         "Development Status :: 3 - Alpha",
