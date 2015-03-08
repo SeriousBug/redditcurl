@@ -8,7 +8,7 @@ setup(
     author="Kaan Genç",
     author_email="kaan_genc@outlook.com",
     url="https://github.com/SeriousBug/redditcurl",
-    download_url="https://github.com/SeriousBug/redditcurl/tarball/0.1.1",
+    download_url="https://github.com/SeriousBug/redditcurl/tarball/0.2.0",
     install_requires=["praw", "requests", "beautifulsoup4"],
     keywords=["reddit", "images", "download"],
     packages=["redditcurl", "redditcurl/websites"],
