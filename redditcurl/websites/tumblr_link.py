@@ -20,7 +20,7 @@ from bs4 import BeautifulSoup
 from . import direct
 import re
 
-match = re.compile("imgur.com/[\S]+").search
+match = re.compile("tumblr.com/post/[\S]+").search
 
 
 def download(url, path, file_name=""):
@@ -34,7 +34,7 @@ def download(url, path, file_name=""):
     """
     response = requests.get(url)
     soup = BeautifulSoup(response.content)
-    post_content = soup(attrs={"class": "post-content"})
+    post_content = soup(attrs={"class": "post"})
     images = BeautifulSoup(str(post_content)).findAll("img")
     if len(images) == 1:
         direct.download(images[0]["src"], path, file_name)
