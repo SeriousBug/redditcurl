@@ -41,6 +41,8 @@ def download(url, path, file_name=""):
     """
     # If the album ends with an image index like /a/0ga2f#0, remove it
     url = url.split('#')[0]
+    if path == "":
+        path = "."
     response = requests.get("{}/zip".format(url))
     with tempfile.TemporaryFile(mode="w+b") as file:
         file.write(response.content)

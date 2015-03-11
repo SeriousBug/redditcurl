@@ -38,5 +38,9 @@ def download(url, path, file_name=""):
     response = requests.get(url)
     soup = BeautifulSoup(response.content)
     images = soup.find_all("img")
-    for i, image in enumerate(images):
-        direct.download(image["src"], path, "{}.{}".format(file_name, i + 1))
+    if file_name == "":
+        for image in images:
+            direct.download(image["src"], path, file_name)
+    else:
+        for i, image in enumerate(images):
+            direct.download(image["src"], path, "{}.{}".format(file_name, i + 1))

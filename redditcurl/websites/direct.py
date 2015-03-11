@@ -58,6 +58,8 @@ def download(url, path, file_name=""):
         base_name = url.split('/')[-1].split('.')[0]
     else:
         base_name = file_name
+    if path == "":
+        path = "."
     extension = response.headers["Content-Type"].split('/')[-1]
     with open("{}/{}.{}".format(path, base_name, extension), mode="wb") as file:
         file.write(response.content)
