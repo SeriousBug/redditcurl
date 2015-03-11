@@ -2,7 +2,7 @@ from setuptools import setup
 
 
 REPOSITORY = "https://github.com/SeriousBug/redditcurl"
-VERSION = "0.3.0"
+VERSION = "0.3.1"
 
 
 setup(
@@ -20,6 +20,7 @@ setup(
     entry_points={
         "console_scripts": ["redditcurl = redditcurl.__main__:__main__"],
     },
+    test_suite="tests.test_websites",
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Environment :: Console",
