@@ -13,7 +13,7 @@ setup(
     author="Kaan Genç",
     author_email="kaan_genc@outlook.com",
     url=REPOSITORY,
-    download_url='/'.join((REPOSITORY, VERSION)),
+    download_url='/'.join((REPOSITORY, 'tarball', VERSION)),
     install_requires=["praw", "requests", "beautifulsoup4"],
     keywords=["reddit", "images", "download"],
     packages=["redditcurl", "redditcurl/websites"],
