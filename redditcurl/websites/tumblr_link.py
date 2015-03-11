@@ -34,8 +34,7 @@ def download(url, path, file_name=""):
     """
     response = requests.get(url)
     soup = BeautifulSoup(response.content)
-    post_content = soup(attrs={"class": "post"})
-    images = BeautifulSoup(str(post_content)).findAll("img")
+    images = soup(attrs={"class": "media"})[0].findAll("img")
     if len(images) == 1:
         direct.download(images[0]["src"], path, file_name)
     else:
