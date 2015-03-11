@@ -17,7 +17,7 @@
 """
 import requests
 from bs4 import BeautifulSoup
-from . import direct
+from redditcurl.websites import direct
 import re
 
 match = re.compile("redditbooru.com/gallery/").search

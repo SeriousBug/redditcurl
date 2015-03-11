@@ -15,5 +15,5 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
-from . import direct, imgur_album, imgur_link, redditbooru_gallery, tumblr_link
+from redditcurl.websites import direct, imgur_album, imgur_link, redditbooru_gallery, tumblr_link
 __all__ = [direct, imgur_album, imgur_link, redditbooru_gallery, tumblr_link]
