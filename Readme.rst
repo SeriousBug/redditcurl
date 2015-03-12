@@ -1,5 +1,12 @@
 redditcurl
 ==========
+    
+.. image:: https://travis-ci.org/SeriousBug/redditcurl.svg?branch=master
+        :target: https://travis-ci.org/SeriousBug/redditcurl
+
+.. image:: https://coveralls.io/repos/SeriousBug/redditcurl/badge.svg
+        :target: https://coveralls.io/r/SeriousBug/redditcurl 
+
 
 redditcurl is a small tool to download the pages you have saved on Reddit.
 redditcurl can handle:
