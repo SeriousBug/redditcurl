@@ -88,22 +88,21 @@ def download_submissions(submission_list, path, processes, use_titles=True, use_
     """
     download_queue = []
     used_folders = set()
-    if use_titles:
-        for sub in submission_list:
-            if only_from == [] or sub.subreddit.display_name.casefold() in only_from:
-                if use_titles:
-                    # Using lstrip on the title to ensure that unix-like OS'es don't hide the files.
-                    # Translate removes the characters that can't be used as file names.
-                    title = sub.title.lstrip(".").translate(_FILENAME_MAP)
-                else:
-                    title = ""
-                if use_folders:
-                    folder = os.path.join(path, sub.subreddit.display_name)
-                    # Keep track of folders to create missing ones later
-                    used_folders.add(folder)
-                else:
-                    folder = path
-                download_queue.append((sub.url, folder, title))
+    for sub in submission_list:
+        if only_from == [] or sub.subreddit.display_name.casefold() in only_from:
+            if use_titles:
+                # Using lstrip on the title to ensure that unix-like OS'es don't hide the files.
+                # Translate removes the characters that can't be used as file names.
+                title = sub.title.lstrip(".").translate(_FILENAME_MAP)
+            else:
+                title = ""
+            if use_folders:
+                folder = os.path.join(path, sub.subreddit.display_name)
+                # Keep track of folders to create missing ones later
+                used_folders.add(folder)
+            else:
+                folder = path
+            download_queue.append((sub.url, folder, title))
     for folder in used_folders:
         try:
             os.makedirs(folder)
