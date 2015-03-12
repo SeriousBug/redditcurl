@@ -58,8 +58,9 @@ redditcurl can be easily imported into your project.
 
     >>> from redditcurl import manager
     >>> my_image = "http://i.imgur.com/gUQnp73.gif"
-    >>> save_path = "/home/user/images"
-    >>> manager.manage_download(my_image, save_path)
+    >>> save_path = "images/"
+    >>> file_name = "funny_picture"
+    >>> manager.manage_download(my_image, save_path, file_name)
     ('http://i.imgur.com/gUQnp73.gif', True)
 
 `redditcurl.manage_download` will pick the correct function and download the image for you.
