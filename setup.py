@@ -16,7 +16,7 @@ setup(
     entry_points={
         "console_scripts": ["redditcurl = redditcurl.__main__:__main__"],
     },
-    test_suite="tests.test_websites",
+    test_suite="tests",
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Environment :: Console",
