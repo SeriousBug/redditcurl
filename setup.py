@@ -1,19 +1,15 @@
 from setuptools import setup
 
 
-REPOSITORY = "https://github.com/SeriousBug/redditcurl"
-VERSION = "0.3.1"
-
-
 setup(
     name="redditcurl",
-    version=VERSION,
+    version="0.3.1",
     description="Download the images you saved on Reddit.",
     license="GPLv3",
     author="Kaan Genç",
     author_email="kaan_genc@outlook.com",
-    url=REPOSITORY,
-    download_url='/'.join((REPOSITORY, 'tarball', VERSION)),
+    url="https://github.com/SeriousBug/redditcurl",
+    download_url="https://github.com/SeriousBug/redditcurl/releases",
     install_requires=["praw", "requests", "beautifulsoup4"],
     keywords=["reddit", "images", "download"],
     packages=["redditcurl", "redditcurl/websites"],
