@@ -10,6 +10,7 @@ test_links = {
             "imgur_album": "https://imgur.com/a/IEKXq",
             "redditbooru_gallery": "http://awwnime.redditbooru.com/gallery/nchg/chiyo-chan/",
             "tumblr_link": "http://cowboy-bebop.tumblr.com/post/111839970633",
+            "fail": "https://github.com/SeriousBug/redditcurl"
             }
 
 

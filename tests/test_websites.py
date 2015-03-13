@@ -23,6 +23,13 @@ class TestMatcher(unittest.TestCase):
     def test_tumblr_link(self):
         self.assertTrue(websites.tumblr_link.match(test_links["tumblr_link"]))
 
+    def test_fail(self):
+        self.assertFalse(websites.direct.match(test_links["fail"]))
+        self.assertFalse(websites.imgur_link.match(test_links["fail"]))
+        self.assertFalse(websites.imgur_album.match(test_links["fail"]))
+        self.assertFalse(websites.redditbooru_gallery.match(test_links["fail"]))
+        self.assertFalse(websites.tumblr_link.match(test_links["fail"]))
+
 
 class TestDownloadNamed(test_base.EnterTemp):
     def test_direct(self):

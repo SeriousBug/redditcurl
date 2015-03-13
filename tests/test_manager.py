@@ -31,3 +31,7 @@ class TestManageDownload(test_base.EnterTemp):
     def test_tumblr_link(self, mocked):
         manager.manage_download(test_links["tumblr_link"], "path", "file")
         mocked.assert_called_once_with(test_links["tumblr_link"], "path", "file")
+
+    def test_failing_download(self):
+        self.assertEqual(manager.manage_download(test_links["fail"], "path", "file"),
+            (test_links["fail"], False))
