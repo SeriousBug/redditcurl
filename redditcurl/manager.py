@@ -19,6 +19,7 @@ import os
 import sys
 import multiprocessing
 import gzip
+import json
 from redditcurl import websites
 
 # All file names will be translated according to _FILENAME_MAP, in order to remove characters
@@ -137,7 +138,7 @@ def filter_new(submission_list, downloaded_file):
     """
     try:
         with gzip.open(downloaded_file) as file:
-            downloaded = file.read().decode("utf-8").split()
+            downloaded = json.loads(file.read().decode("utf-8"))
     except (FileNotFoundError):
         downloaded = []
     # Filter to allow only new link posts
@@ -154,5 +155,10 @@ def update_new(saved_list, downloaded_file):
         downloaded_file: Path to a .gz file, containing a list of downloaded images.
             If the file doesn't exist, it will be created.
     """
-    with gzip.open(downloaded_file, "ab") as file:
-        file.write(("\n".join(saved_list)).encode("utf-8"))
+    try:
+        with gzip.open(downloaded_file, "rb") as file:
+            old_list = json.loads(file.read().decode("utf-8"))
+    except FileNotFoundError:
+            old_list = []
+    with gzip.open(downloaded_file, "wb") as file:
+        file.write(json.dumps(old_list + saved_list).encode("utf-8"))
