@@ -2,16 +2,29 @@ import os
 import tempfile
 import unittest
 import shutil
+from praw import objects
+from unittest.mock import MagicMock
 
 
 test_links = {
-            "direct": "https://i.imgur.com/AaLX1Wn.jpg",
-            "imgur_link": "https://imgur.com/AaLX1Wn",
-            "imgur_album": "https://imgur.com/a/IEKXq",
-            "redditbooru_gallery": "http://awwnime.redditbooru.com/gallery/nchg/chiyo-chan/",
-            "tumblr_link": "http://cowboy-bebop.tumblr.com/post/111839970633",
-            "fail": "https://github.com/SeriousBug/redditcurl"
-            }
+    "direct": "https://i.imgur.com/AaLX1Wn.jpg",
+    "imgur_link": "https://imgur.com/AaLX1Wn",
+    "imgur_album": "https://imgur.com/a/IEKXq",
+    "redditbooru_gallery": "http://awwnime.redditbooru.com/gallery/nchg/chiyo-chan/",
+    "tumblr_link": "http://cowboy-bebop.tumblr.com/post/111839970633",
+    "fail": "https://github.com/SeriousBug/redditcurl"
+    }
+
+
+def create_submission(url="", title="", subreddit=""):
+    submission = MagicMock()
+    submission.url = url
+    submission.title = title
+    submission.subreddit.display_name = subreddit
+    return submission
+
+
+test_submissions = [create_submission(url, title, "testsubreddit") for url, title in test_links.items()]
 
 
 class EnterTemp(unittest.TestCase):
