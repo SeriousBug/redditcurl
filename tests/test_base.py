@@ -2,7 +2,6 @@ import os
 import tempfile
 import unittest
 import shutil
-from praw import objects
 from unittest.mock import MagicMock
 
 
@@ -24,7 +23,7 @@ def create_submission(url="", title="", subreddit=""):
     return submission
 
 
-test_submissions = [create_submission(url, title, "testsubreddit") for url, title in test_links.items()]
+test_submissions = [create_submission(url, title, "testsubreddit") for title, url in test_links.items()]
 
 
 class EnterTemp(unittest.TestCase):

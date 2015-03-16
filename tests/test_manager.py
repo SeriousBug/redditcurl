@@ -1,6 +1,5 @@
 import gzip
 import json
-import unittest
 from unittest import mock
 from tests import test_base
 from redditcurl import manager
@@ -8,6 +7,9 @@ from redditcurl import manager
 
 test_links = test_base.test_links
 test_submissions = test_base.test_submissions
+original_urls = [submission.url for submission in test_submissions]
+original_titles = [submission.title for submission in test_submissions]
+original_subreddits = [submission.subreddit.display_name for submission in test_submissions]
 
 
 class TestManageDownload(test_base.EnterTemp):
@@ -68,17 +70,16 @@ class TestFilterNew(test_base.EnterTemp):
         filtered_items = manager.filter_new(test_submissions, ".downloaded.gz")
         self.assertTrue(len(test_submissions) > 0)
         self.assertTrue(len(filtered_items) > 0)
-        for filtered, original in zip(filtered_items, test_submissions):
-            self.assertEqual(filtered.url, original.url)
-            self.assertEqual(filtered.title, original.title)
-            self.assertEqual(filtered.subreddit.display_name, original.subreddit.display_name)
+        for filtered in filtered_items:
+            self.assertTrue(filtered.url in original_urls)
+            self.assertTrue(filtered.title in original_titles)
+            self.assertTrue(filtered.subreddit.display_name in original_subreddits)
 
     def test_filter_new_empty(self):
         # Test filter new without a downloaded file
         filtered_items = manager.filter_new(test_submissions, ".downloaded.gz")
         self.assertTrue(len(filtered_items) == len(test_links))
-        for filtered, original in zip(filtered_items, test_submissions):
-            self.assertEqual(filtered.url, original.url)
-            self.assertEqual(filtered.title, original.title)
-            self.assertEqual(filtered.subreddit.display_name, original.subreddit.display_name)
-    
+        for filtered in filtered_items:
+            self.assertTrue(filtered.url in original_urls)
+            self.assertTrue(filtered.title in original_titles)
+            self.assertTrue(filtered.subreddit.display_name in original_subreddits)
