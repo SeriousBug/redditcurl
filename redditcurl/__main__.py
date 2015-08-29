@@ -4,32 +4,43 @@ import praw
 from redditcurl import manager
 
 
+def setup_parser():
+    """Setup the argument parser.
+
+    The function sets up and returns the argument parser.
+
+    Returns:
+        The argparse.ArgumentParser object.
+    """
+    parser = argparse.ArgumentParser(description="Downloads your saved images from Reddit.")
+    parser.add_argument("-u", "--username", type=str, required=True,
+                        help="Reddit username.")
+    parser.add_argument("-p", "--password", type=str, required=True,
+                        help="Reddit password.")
+    parser.add_argument("-d", "--savedir", type=str, required=True,
+                        help="Directory to save the images.")
+    parser.add_argument("-c", "--processes", type=int, default=20,
+                        help="Number of processes to use. "
+                        "Use 1 to disable multiprocessing.")
+    parser.add_argument("-b", "--subfolders", action="store_true", default=False,
+                        help="Put the images into subfolders, based on their subreddits.")
+    parser.add_argument("-t", "--subreddits", type=str, default="",
+                        help="Only download from specific subreddits. Seperate names with commas (,).")
+    parser.add_argument("-n", "--notitles", action="store_true", default=False,
+                        help="Do not use titles of submissions as file names, "
+                        "use the names of downloaded files instead.")
+    parser.add_argument("-f", "--savefile", type=str, default=".downloaded.gz",
+                        help="The file to keep track of images that have been downloaded.")
+    parser.add_argument("-r", "--remove", action="store_true", default=False,
+                        help="Remove the files that were successfully downloaded from saved.")
+    parser.add_argument("-s", "--silent", action="store_true", default=False,
+                        help="Do not print anything about the scripts actions.")
+    return parser
+
+
 def __main__():
     try:
-        parser = argparse.ArgumentParser(description="Downloads your saved images from Reddit.")
-        parser.add_argument("-u", "--username", type=str, required=True,
-                            help="Reddit username.")
-        parser.add_argument("-p", "--password", type=str, required=True,
-                            help="Reddit password.")
-        parser.add_argument("-d", "--savedir", type=str, required=True,
-                            help="Directory to save the images.")
-        parser.add_argument("-c", "--processes", type=int, default=20,
-                            help="Number of processes to use. "
-                                 "Use 1 to disable multiprocessing.")
-        parser.add_argument("-b", "--subfolders", action="store_true", default=False,
-                            help="Put the images into subfolders, based on their subreddits.")
-        parser.add_argument("-t", "--subreddits", type=str, default="",
-                            help="Only download from specific subreddits. Seperate names with commas (,).")
-        parser.add_argument("-n", "--notitles", action="store_true", default=False,
-                            help="Do not use titles of submissions as file names, "
-                                 "use the names of downloaded files instead.")
-        parser.add_argument("-f", "--savefile", type=str, default=".downloaded.gz",
-                            help="The file to keep track of images that have been downloaded.")
-        parser.add_argument("-r", "--remove", action="store_true", default=False,
-                            help="Remove the files that were successfully downloaded from saved.")
-        parser.add_argument("-s", "--silent", action="store_true", default=False,
-                            help="Do not print anything about the scripts actions.")
-        args = parser.parse_args()
+        args = setup_parser().parse_args()
         if args.silent:
             prints = lambda x: None
         else:
