@@ -105,6 +105,24 @@ def get_config(args):
     return final_config
 
 
+def count_success(downloaded, remove, prints):
+    """Count the successful downloads."""
+    success_count = 0
+    fail_count = 0
+    successful_downloads = []
+    for i, submission in enumerate(downloaded):
+        url, successful = submission
+        if not successful:
+            fail_count += 1
+            prints("Download failed: {}".format(url))
+        else:  # successful
+            success_count += 1
+            successful_downloads.append(url)
+            if remove:
+                saved[i].unsave()
+    return success_count, fail_count, successful_downloads
+
+
 def __main__():
     try:
         args = setup_parser().parse_args()
@@ -136,19 +154,7 @@ def __main__():
                                                   conf.getboolean("subfolders"), subreddits)
         prints("Processed {} urls.".format(len(downloaded)))
         remove = conf.getboolean("remove")
-        success_count = 0
-        fail_count = 0
-        successful_downloads = []
-        for i, submission in enumerate(downloaded):
-            url, successful = submission
-            if not successful:
-                fail_count += 1
-                prints("Download failed: {}".format(url))
-            else:  # successful
-                success_count += 1
-                successful_downloads.append(url)
-                if remove:
-                    saved[i].unsave()
+        success_count, fail_count, successful_downloads = count_success(downloaded, remove, prints)
         prints("Updating saved files list.")
         manager.update_new(successful_downloads, save_file)
         prints("\nDownloading finished.")
