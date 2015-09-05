@@ -138,7 +138,7 @@ def __main__():
             prints("Downloading from {}".format(', '.join(subreddits)))
         r = praw.Reddit(user_agent="Just {} downloading some images".format(conf.get("username")))
         prints("Logging in as {}.".format(conf.get("username")))
-        r.login(username=conf.get("username"), password=conf.get("password"))
+        r.login(username=conf.get("username"), password=conf.get("password"), disable_warning=True)
         prints("Logged in.")
         prints("Getting data...")
         try:
