@@ -58,6 +58,22 @@ For example, if you want redditcurl to download the images, without using multip
 
     % redditcurl -u karmanaut -p hunter2 -d /home/karmanaut/images -c 1 -s -r
 
+Configuring
+-----------
+
+You can set up a configuration file instead of setting everything up with command-line flags. This configuration file should be located at `$XDG_CONFIG_HOME/redditcurl`, or `.config/redditcurl` if that variable is not set. A sample configuration file is below::
+
+    [redditcurl]
+    username = karmanaut
+    password = hunter2
+    savedir = /home/karmanaut/Pictures
+    processes = 10
+    subfolders = true
+
+You can set up all command line options in the configuration file as well, simply use their long names without the dashes. Note that no variable expansion or globbing is done on savedir, so it must be set to an absolute path.
+
+You don't have to write your password to the configuration file, you can set up some of the configuration through the file, while setting up the rest with command-line arguments. Arguments will overwrite the configuration file, if the same option is provided in both.
+    
 Importing
 ---------
 
