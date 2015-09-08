@@ -33,7 +33,7 @@ def download(url, path, file_name=""):
             If file_name is an empty string, name of the downloaded file will be used.
     """
     response = requests.get(url)
-    soup = BeautifulSoup(response.content)
+    soup = BeautifulSoup(response.content, "html.parser")
     post = soup(class_="media")
     images = post[0]("img", class_=False)
     direct.download(images[0]["src"], path, file_name)

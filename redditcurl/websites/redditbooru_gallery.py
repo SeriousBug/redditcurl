@@ -36,7 +36,7 @@ def download(url, path, file_name=""):
             the names they have on the server.
     """
     response = requests.get(url)
-    soup = BeautifulSoup(response.content)
+    soup = BeautifulSoup(response.content, "html.parser")
     images = soup.find_all("img")
     if file_name == "":
         for image in images:
