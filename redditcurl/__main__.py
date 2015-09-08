@@ -11,9 +11,14 @@ DEFAULTS = {"processes":  "20",
             "notitles":   "false",
             "savefile":   ".downloaded.gz",
             "remove":     "false",
-            "silent":     "false"
+            "silent":     "false"            
 }
 
+OAUTH_DEFAULTS = {"clientid": "Fp9ci3HipOW1FQ",
+                  "redirect": "http://127.0.0.1:65010/authorize_callback",
+}
+
+OAUTH_SCOPES = {"identity", "history"}
 
 class ConfigError(Exception):
     """The exception which is raised when a required configuration was not set."""
@@ -29,10 +34,6 @@ def setup_parser():
         The argparse.ArgumentParser object.
     """
     parser = argparse.ArgumentParser(description="Downloads your saved images from Reddit.")
-    parser.add_argument("-u", "--username", type=str,
-                        help="Reddit username.")
-    parser.add_argument("-p", "--password", type=str,
-                        help="Reddit password.")
     parser.add_argument("-d", "--savedir", type=str,
                         help="Directory to save the images.")
     parser.add_argument("-c", "--processes", type=int,
@@ -71,7 +72,7 @@ def args2dict(args):
     return {k: str(v) for k, v in vars(args).items() if not (v is None or v is  False)}
     
 
-def get_config(args):
+def get_config(args, config_file):
     """Decide on the program configuration.
 
     This function uses, in this order, the built-in defaults, the configuration file,
@@ -80,6 +81,7 @@ def get_config(args):
 
     Args:
         args: An argparse.Namespace object, normally built by parse_args function.
+        config_parser: A string, showing the path to the configuration file.
 
     Returns:
         A dictionary, containing the settings for the application.
@@ -91,18 +93,13 @@ def get_config(args):
     """
     config = configparser.ConfigParser()
     config.read_dict({"redditcurl": DEFAULTS})
-    config_file = find_config()
+    config.read_dict({"oauth": OAUTH_DEFAULTS})
     config.read(config_file)
     config.read_dict({"redditcurl": args2dict(args)})
     # Check if the required fields have been filled
-    final_config = config["redditcurl"]
-    if not "username" in final_config:
-        raise ConfigError("No username set!")
-    if not "password" in final_config:
-        raise ConfigError("No password set!")
-    if not "savedir" in final_config:
+    if not "savedir" in config["redditcurl"]:
         raise ConfigError("No save directory set!")
-    return final_config
+    return config
 
 
 def count_success(downloaded, remove, prints):
@@ -123,44 +120,70 @@ def count_success(downloaded, remove, prints):
     return success_count, fail_count, successful_downloads
 
 
+def is_authenticated(conf):
+    """Returns True if the user has OAuth2 tokens set up, False otherwise."""
+    return all(("access_token" in conf, "refresh_token" in conf))
+
+
 def __main__():
     try:
         args = setup_parser().parse_args()
-        conf = get_config(args)
-        if conf.getboolean("silent"):
+        conf_path = find_config()
+        conf = get_config(args, conf_path)
+        conf_r = conf["redditcurl"]
+        conf_o = conf["oauth"]
+        if conf_r.getboolean("silent"):
             prints = lambda x: None
         else:
             prints = print
-        if conf.get("subreddits") == "":
+        if conf_r.get("subreddits") == "":
             subreddits = []
         else:
-            subreddits = conf.get("subreddits").strip(',').casefold().split(',')
+            subreddits = conf_r.get("subreddits").strip(',').casefold().split(',')
             prints("Downloading from {}".format(', '.join(subreddits)))
-        r = praw.Reddit(user_agent="Just {} downloading some images".format(conf.get("username")))
-        prints("Logging in as {}.".format(conf.get("username")))
-        r.login(username=conf.get("username"), password=conf.get("password"), disable_warning=True)
-        prints("Logged in.")
+        r = praw.Reddit(user_agent="redditcurl")
+        print(conf_o.get("clientid"))
+        print(conf_o.get("redirect"))
+        r.set_oauth_app_info(client_id=conf_o.get("clientid"),
+                             redirect_uri=conf_o.get("redirect"),
+                             client_secret="None")
+        if not is_authenticated(conf_o):
+            auth_url = r.get_authorize_url("state", OAUTH_SCOPES, True)
+            print("Please visit {} to authorize access to your account history.".format(auth_url))
+            auth_code = input("Enter the code: ")
+            access_information = r.get_access_information(auth_code)
+            conf.read_dict({"oauth":
+                            {"refresh_token": access_information["refresh_token"],
+                             "access_token": access_information["access_token"]}
+            })
+            with open(conf_path, "w") as conf_file:
+                conf.write(conf_file)
+        else:
+            r.set_access_credentials(scope=OAUTH_SCOPES,
+                                     access_token=conf_o.get("access_token"),
+                                     refresh_token=conf_o.get("refresh_token"))
+            prints("Refreshing access token.")
+            r.refresh_access_information(conf_o.get("refresh_token"))
+            # We don't save the new access_token here, since we refresh it every time the program is run
         prints("Getting data...")
         try:
-            os.makedirs(conf.get("savedir"))
+            os.makedirs(conf_r.get("savedir"))
         except (FileExistsError):
             # If the save directory exists, we don't need to create it
             pass
-        save_file = os.path.join(conf.get("savedir"), conf.get("savefile"))
+        save_file = os.path.join(conf_r.get("savedir"), conf_r.get("savefile"))
         saved = manager.filter_new(r.user.get_saved(limit=None), save_file)
-        prints("Starting to download, using {} processes.".format(conf.get("processes")))
-        downloaded = manager.download_submissions(saved, conf.get("savedir"), conf.getint("processes"),
-                                                  not conf.getboolean("notitles"),
-                                                  conf.getboolean("subfolders"), subreddits)
+        prints("Starting to download, using {} processes.".format(conf_r.get("processes")))
+        downloaded = manager.download_submissions(saved, conf_r.get("savedir"), conf_r.getint("processes"),
+                                                  not conf_r.getboolean("notitles"),
+                                                  conf_r.getboolean("subfolders"), subreddits)
         prints("Processed {} urls.".format(len(downloaded)))
-        remove = conf.getboolean("remove")
+        remove = conf_r.getboolean("remove")
         success_count, fail_count, successful_downloads = count_success(downloaded, remove, prints)
         prints("Updating saved files list.")
         manager.update_new(successful_downloads, save_file)
         prints("\nDownloading finished.")
         prints("Successful: {} \t Failed: {}".format(success_count, fail_count))
-    except (praw.errors.InvalidUserPass):
-        print("Wrong password!")
     except (ConfigError) as err:
         print(err)
 
