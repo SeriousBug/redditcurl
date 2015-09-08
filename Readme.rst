@@ -37,18 +37,22 @@ Setuptools should automatically install these while installing redditcurl.
 Usage
 -----
 
-To be able to access your saved images, redditcurl requires your username and password. You also need to tell it where the images should be saved. ::
+To start using redditcurl, simply call it with a save directory::
 
-    % redditcurl -u karmanaut -p hunter2 -d /home/karmanaut/images
+    % redditcurl -d /home/karmanaut/images
+    Please visit https://www.reddit.com/api/v1/authorize/?state=... to authorize access to your account history.
 
-By default, redditcurl will use 5 processes to process the links and download the images.
+Redditcurl will print an authorization URL for you. Visit that and allow redditcurl to access your history.
+Once you accept the authorization, you will be redirected to a page. Copy the authorization code you are given, and paste it into redditcurl, and you are done.
+
+By default, redditcurl will use 20 processes to process the links and download the images.
 If you want to disable multiprocessing, or use more processes, you can pick the number of processes with `-c` or `--processes`.
 
 Also by default, redditcurl will give names to the downloaded images, based on the titles of the reddit submissions. If you want to simply keep the names of the downloaded files, you can use `-n` or `--notitles`.
 
 So for example, if you want redditcurl to download your saved images, and store them at `/home/karmanaut/images` without using their titles, and use 10 processes while downloading, you can do::
 
-    % redditcurl -u karmanaut -p hunter2 -d /home/karmanaut/images -c 10 -n
+    % redditcurl -d /home/karmanaut/images -c 10 -n
 
 If you want redditcurl to remove the images from your saved images as it downloads them, you can use `-r` or `--remove`. Note that redditcurl keeps track of the images that have been downloaded, and will not re-download them the next time it is run, so you should not need to use this flag.
 
@@ -56,7 +60,7 @@ Finally, redditcurl will print out some messages while it runs, including some w
 
 For example, if you want redditcurl to download the images, without using multiprocessing, print nothing while running, and remove the saved images if the downloads succeed, you can do::
 
-    % redditcurl -u karmanaut -p hunter2 -d /home/karmanaut/images -c 1 -s -r
+    % redditcurl -d /home/karmanaut/images -c 1 -s -r
 
 Configuring
 -----------
@@ -64,15 +68,13 @@ Configuring
 You can set up a configuration file instead of setting everything up with command-line flags. This configuration file should be located at `$XDG_CONFIG_HOME/redditcurl`, or `.config/redditcurl` if that variable is not set. A sample configuration file is below::
 
     [redditcurl]
-    username = karmanaut
-    password = hunter2
     savedir = /home/karmanaut/Pictures
     processes = 10
     subfolders = true
 
 You can set up all command line options in the configuration file as well, simply use their long names without the dashes. Note that no variable expansion or globbing is done on savedir, so it must be set to an absolute path.
 
-You don't have to write your password to the configuration file, you can set up some of the configuration through the file, while setting up the rest with command-line arguments. Arguments will overwrite the configuration file, if the same option is provided in both.
+Even if you don't create a configuration file yourself, redditcurl will write one the first time it is run.
     
 Importing
 ---------

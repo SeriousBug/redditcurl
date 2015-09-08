@@ -15,7 +15,7 @@ DEFAULTS = {"processes":  "20",
 }
 
 OAUTH_DEFAULTS = {"clientid": "Fp9ci3HipOW1FQ",
-                  "redirect": "http://127.0.0.1:65010/authorize_callback",
+                  "redirect": "http://kaangenc.me/static/redditcurl.html"
 }
 
 OAUTH_SCOPES = {"identity", "history"}
@@ -142,8 +142,6 @@ def __main__():
             subreddits = conf_r.get("subreddits").strip(',').casefold().split(',')
             prints("Downloading from {}".format(', '.join(subreddits)))
         r = praw.Reddit(user_agent="redditcurl")
-        print(conf_o.get("clientid"))
-        print(conf_o.get("redirect"))
         r.set_oauth_app_info(client_id=conf_o.get("clientid"),
                              redirect_uri=conf_o.get("redirect"),
                              client_secret="None")
