@@ -3,11 +3,11 @@ from setuptools import setup
 
 setup(
     name="redditcurl",
-    version="0.3.1",
+    version="0.4.0",
     description="Download the images you saved on Reddit.",
     license="GPLv3",
     author="Kaan Genç",
-    author_email="kaan_genc@outlook.com",
+    author_email="pypi@kaangenc.me",
     url="https://github.com/SeriousBug/redditcurl",
     download_url="https://github.com/SeriousBug/redditcurl/releases",
     install_requires=["praw", "requests", "beautifulsoup4"],
