@@ -102,7 +102,7 @@ def get_config(args, config_file):
     return config
 
 
-def count_success(downloaded, remove, prints):
+def count_success(downloaded, remove, prints, saved):
     """Count the successful downloads."""
     success_count = 0
     fail_count = 0
@@ -177,7 +177,7 @@ def __main__():
                                                   conf_r.getboolean("subfolders"), subreddits)
         prints("Processed {} urls.".format(len(downloaded)))
         remove = conf_r.getboolean("remove")
-        success_count, fail_count, successful_downloads = count_success(downloaded, remove, prints)
+        success_count, fail_count, successful_downloads = count_success(downloaded, remove, prints, saved)
         prints("Updating saved files list.")
         manager.update_new(successful_downloads, save_file)
         prints("\nDownloading finished.")
