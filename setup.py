@@ -3,7 +3,7 @@ from setuptools import setup
 
 setup(
     name="redditcurl",
-    version="0.4.0",
+    version="0.4.1",
     description="Download the images you saved on Reddit.",
     license="GPLv3",
     author="Kaan Genç",
