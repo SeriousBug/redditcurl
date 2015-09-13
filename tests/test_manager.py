@@ -1,5 +1,7 @@
+import os
 import gzip
 import json
+import unittest
 from unittest import mock
 from tests import test_base
 from redditcurl import manager
@@ -83,3 +85,75 @@ class TestFilterNew(test_base.EnterTemp):
             self.assertTrue(filtered.url in original_urls)
             self.assertTrue(filtered.title in original_titles)
             self.assertTrue(filtered.subreddit.display_name in original_subreddits)
+
+
+class TestDownloadInfo(unittest.TestCase):
+    def test_title_folder(self):
+        # Any submission will do, no logic tied to submission itself here
+        submission = test_base.create_submission(title="test title", subreddit="testsubreddit")
+        folder, title = manager.download_info(submission, "testfolder", True, True)
+        self.assertEqual(folder, os.path.join("testfolder", "testsubreddit"))
+        self.assertEqual(title, "test title")
+
+    def test_notitle_nofolder(self):
+        submission = test_base.create_submission(title="test title", subreddit="testsubreddit")
+        folder, title = manager.download_info(submission, "testfolder", False, False)
+        self.assertEqual(folder, "testfolder")
+        self.assertEqual(title, "")
+
+    def test_special_title(self):
+        submission = test_base.create_submission(title=".title w/ special characters", subreddit="testsubreddit")
+        folder, title = manager.download_info(submission, "testfolder", True, True)
+        self.assertEqual(title, "title w special characters")
+
+
+class TestMakeFolders(test_base.EnterTemp):
+    def test_make_folders(self):
+        manager.make_folders(["testfolder", "otherfolder"])
+        self.assertTrue(os.path.isdir("testfolder"))
+        self.assertTrue(os.path.isdir("otherfolder"))
+
+    def test_make_subfolders(self):
+        manager.make_folders(["testfolder/subfolder", "testfolder/otherfolder"])
+        self.assertTrue(os.path.isdir("testfolder"))
+        self.assertTrue(os.path.isdir("testfolder/subfolder"))
+        self.assertTrue(os.path.isdir("testfolder/otherfolder"))
+
+
+class TestCleanupFolders(test_base.EnterTemp):
+    def test_cleanup_folders(self):
+        os.makedirs("testfolder")
+        os.makedirs("otherfolder")
+        manager.cleanup_folders(["testfolder", "otherfolder"])
+        self.assertFalse(os.path.isdir("testfolder"))
+        self.assertFalse(os.path.isdir("otherfolder"))
+
+    def test_cleanup_nonempty(self):
+        # Set up a folder and touch a file in it
+        os.makedirs("testfolder")
+        open("testfolder/testfile", "w").close()
+        manager.cleanup_folders(["testfolder"])
+        # Shouldn't get cleaned up since it isn't empty
+        self.assertTrue(os.path.isdir("testfolder"))
+
+
+class TestProcessSubmission(unittest.TestCase):
+    def test_process_all(self):
+        download_queue, used_folders = manager.process_submissions(test_submissions, ".", True, True, [])
+        # Checking for only_from, ensure that none got filtered
+        for url, folder, title in download_queue:
+            self.assertTrue(url in original_urls)
+        self.assertEqual(len(download_queue), len(test_submissions))
+
+    def test_process_only_from(self):
+        download_queue, used_folders = manager.process_submissions(test_submissions, ".", True, True, ["testsubreddit"])
+        # All must have passed again, all submissions are from correct subreddit
+        for url, folder, title in download_queue:
+            self.assertTrue(url in original_urls)
+        self.assertEqual(len(download_queue), len(test_submissions))
+
+    def test_process_nowhere(self):
+        download_queue, used_folders = manager.process_submissions(test_submissions, ".", True, True, ["nowhere"])
+        # None should pass, all are from wrong subreddit
+        self.assertEqual(len(download_queue), 0)
+
