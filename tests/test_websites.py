@@ -17,6 +17,9 @@ class TestMatcher(unittest.TestCase):
     def test_imgur_album(self):
         self.assertTrue(websites.imgur_album.match(test_links["imgur_album"]))
 
+    def test_imgur_gifv(self):
+        self.assertTrue(websites.imgur_gifv.match(test_links["imgur_gifv"]))
+        
     def test_redditbooru_gallery(self):
         self.assertTrue(websites.redditbooru_gallery.match(test_links["redditbooru_gallery"]))
 
@@ -46,6 +49,10 @@ class TestDownloadNamed(test_base.EnterTemp):
         self.assertTrue(os.path.isfile("penguins.2.jpg"))
         self.assertTrue(os.path.isfile("penguins.3.jpg"))
 
+    def test_imgur_gifv(self):
+        websites.imgur_gifv.download(test_links["imgur_gifv"], "", "walking penguin")
+        self.assertTrue(os.path.isfile("walking penguin.webm"))
+
     def test_redditbooru_gallery(self):
         websites.redditbooru_gallery.download(test_links["redditbooru_gallery"], "", "anime")
         self.assertTrue(os.path.isfile("anime.1.jpeg"))
@@ -71,6 +78,10 @@ class TestDownloadUnnamed(test_base.EnterTemp):
         self.assertTrue(os.path.isfile("1 - AaLX1Wn.jpg"))
         self.assertTrue(os.path.isfile("2 - ASXSZ2e.jpg"))
         self.assertTrue(os.path.isfile("3 - 3TaDvRX.jpg"))
+
+    def test_imgur_gifv(self):
+        websites.imgur_gifv.download(test_links["imgur_gifv"], "", "")
+        self.assertTrue(os.path.isfile("bJ0h81c.webm"))
 
     def test_redditbooru_gallery(self):
         websites.redditbooru_gallery.download(test_links["redditbooru_gallery"], "", "")
@@ -98,6 +109,10 @@ class TestDownloadPath(test_base.EnterTemp):
         self.assertTrue(os.path.isfile("sub/penguins.2.jpg"))
         self.assertTrue(os.path.isfile("sub/penguins.3.jpg"))
 
+    def test_imgur_gifv(self):
+        websites.imgur_gifv.download(test_links["imgur_gifv"], "sub", "walking penguin")
+        self.assertTrue(os.path.isfile("sub/walking penguin.webm"))
+                        
     def test_redditbooru_gallery(self):
         websites.redditbooru_gallery.download(test_links["redditbooru_gallery"], "sub", "anime")
         self.assertTrue(os.path.isfile("sub/anime.1.jpeg"))

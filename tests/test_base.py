@@ -9,10 +9,24 @@ test_links = {
     "direct": "https://i.imgur.com/AaLX1Wn.jpg",
     "imgur_link": "https://imgur.com/AaLX1Wn",
     "imgur_album": "https://imgur.com/a/IEKXq",
+    "imgur_gifv": "https://i.imgur.com/bJ0h81c.gifv",
     "redditbooru_gallery": "http://awwnime.redditbooru.com/gallery/nchg/chiyo-chan/",
     "tumblr_link": "http://cowboy-bebop.tumblr.com/post/111839970633",
     "fail": "https://github.com/SeriousBug/redditcurl"
     }
+
+
+test_args = [ "--savedir", "testdir"
+            , "--processes", "10"
+            , "--subfolders"
+            , "--subreddits", "test,testing"]
+
+test_config = """
+[redditcurl]
+savedir = testdir
+processes = 0
+notitles = true
+"""
 
 
 def create_submission(url="", title="", subreddit=""):
