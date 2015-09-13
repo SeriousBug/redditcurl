@@ -68,6 +68,52 @@ def manage_download(url, path, file_name=""):
         return url, False
 
 
+def download_info(submission, path, use_titles, use_folders):
+    """Return the download information for the given submission."""
+    if use_titles:
+        # Using lstrip on the title to ensure that unix-like OS'es don't hide the files.
+        # Translate removes the characters that can't be used as file names.
+        title = submission.title.lstrip(".").translate(_FILENAME_MAP)
+    else:
+        title = ""
+    if use_folders:
+        folder = os.path.join(path, submission.subreddit.display_name)
+    else:
+        folder = path
+    return folder, title
+
+
+def process_submissions(submission_list, path, use_titles, use_folders, only_from):
+    """Process the submission list, generating a download queue and a list of folders to be used.."""
+    download_queue = []
+    used_folders = set()
+    for sub in submission_list:
+        if only_from == [] or sub.subreddit.display_name.casefold() in only_from:
+            folder, title = download_info(sub, path, use_titles, use_folders)
+            download_queue.append((sub.url, folder, title))
+            # Keep track of folders to create missing ones later
+            used_folders.add(folder)
+    return download_queue, used_folders
+
+
+def make_folders(used_folders):
+    """Create the folders that will be possibly used."""
+    for folder in used_folders:
+        try:
+            os.makedirs(folder)
+        except (FileExistsError):
+            pass
+
+
+def cleanup_folders(used_folders):
+    """Delete the folders that were not used."""
+    for folder in used_folders:
+        try:
+            os.removedirs(folder)
+        except (OSError):
+            pass
+
+
 def download_submissions(submission_list, path, processes, use_titles=True, use_folders=True, only_from=[]):
     """Download all images in the submission_list to path.
 
@@ -87,39 +133,14 @@ def download_submissions(submission_list, path, processes, use_titles=True, use_
         A list of tuples, containing the url of the image and True if the image was successfully downloaded,
         otherwise False.
     """
-    download_queue = []
-    used_folders = set()
-    for sub in submission_list:
-        if only_from == [] or sub.subreddit.display_name.casefold() in only_from:
-            if use_titles:
-                # Using lstrip on the title to ensure that unix-like OS'es don't hide the files.
-                # Translate removes the characters that can't be used as file names.
-                title = sub.title.lstrip(".").translate(_FILENAME_MAP)
-            else:
-                title = ""
-            if use_folders:
-                folder = os.path.join(path, sub.subreddit.display_name)
-                # Keep track of folders to create missing ones later
-                used_folders.add(folder)
-            else:
-                folder = path
-            download_queue.append((sub.url, folder, title))
-    for folder in used_folders:
-        try:
-            os.makedirs(folder)
-        except (FileExistsError):
-            pass
+    download_queue, used_folders = process_submissions(submission_list, path, use_titles, use_folders, only_from)
+    make_folders(used_folders)
     if processes > 1:
         with multiprocessing.Pool(processes=processes) as pool:
             results = pool.starmap(manage_download, download_queue)
     else:
         results = [manage_download(*submission) for submission in download_queue]
-    # Remove empty folders that have been created
-    for folder in used_folders:
-        try:
-            os.removedirs(folder)
-        except (OSError):
-            pass
+    cleanup_folders(used_folders)
     return results
 
 
