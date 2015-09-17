@@ -5,6 +5,6 @@ install:
   - pip install -r requirements.txt
   - pip install coveralls
 script:
-  - nosetests --with-coverage --cover-package=redditcurl --processes=-1 --process-timeout=20
+  - coverage run --source=redditcurl setup.py test
 after_success:
   coveralls
