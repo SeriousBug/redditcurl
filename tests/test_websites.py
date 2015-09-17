@@ -11,6 +11,9 @@ class TestMatcher(unittest.TestCase):
     def test_direct(self):
         self.assertTrue(websites.direct.match(test_links["direct"]))
 
+    def test_gfycat(self):
+        self.assertTrue(websites.gfycat.match(test_links["gfycat"]))
+        
     def test_imgur_link(self):
         self.assertTrue(websites.imgur_link.match(test_links["imgur_link"]))
 
@@ -38,6 +41,10 @@ class TestDownloadNamed(test_base.EnterTemp):
     def test_direct(self):
         websites.direct.download(test_links["direct"], "", "direct")
         self.assertTrue(os.path.isfile("direct.jpeg"))
+
+    def test_gfycat(self):
+        websites.gfycat.download(test_links["gfycat"], "", "Penguin in snow")
+        self.assertTrue(os.path.isfile("Penguin in snow.webm"))
 
     def test_imgur_link(self):
         websites.imgur_link.download(test_links["imgur_link"], "", "Emperor Penguin")
@@ -69,6 +76,10 @@ class TestDownloadUnnamed(test_base.EnterTemp):
         websites.direct.download(test_links["direct"], "", "")
         self.assertTrue(os.path.isfile("AaLX1Wn.jpeg"))
 
+    def test_gfycat(self):
+        websites.gfycat.download(test_links["gfycat"], "", "")
+        self.assertTrue(os.path.isfile("QualifiedDefensiveAddax.webm"))
+
     def test_imgur_link(self):
         websites.imgur_link.download(test_links["imgur_link"], "", "")
         self.assertTrue(os.path.isfile("AaLX1Wn.jpeg"))
@@ -98,6 +109,10 @@ class TestDownloadPath(test_base.EnterTemp):
     def test_direct(self):
         websites.direct.download(test_links["direct"], "sub", "direct")
         self.assertTrue(os.path.isfile("sub/direct.jpeg"))
+
+    def test_gfycat(self):
+        websites.gfycat.download(test_links["gfycat"], "sub", "Penguin in snow")
+        self.assertTrue(os.path.isfile("sub/Penguin in snow.webm"))
 
     def test_imgur_link(self):
         websites.imgur_link.download(test_links["imgur_link"], "sub", "Emperor Penguin")

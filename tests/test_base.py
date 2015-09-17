@@ -7,6 +7,7 @@ from unittest.mock import MagicMock
 
 test_links = {
     "direct": "https://i.imgur.com/AaLX1Wn.jpg",
+    "gfycat": "https://gfycat.com/QualifiedDefensiveAddax",
     "imgur_link": "https://imgur.com/AaLX1Wn",
     "imgur_album": "https://imgur.com/a/IEKXq",
     "imgur_gifv": "https://i.imgur.com/bJ0h81c.gifv",
