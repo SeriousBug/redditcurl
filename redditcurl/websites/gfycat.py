@@ -23,7 +23,7 @@ from redditcurl.websites import direct
 _GFYCAT_API_URL = "https://gfycat.com/cajax/get/{}"
 PREFER_WEBM = True
 
-match = re.compile("^https?://gfycat.com/[a-zA-Z]+[?#]*$").search
+match = re.compile("^https?://(www[.])?gfycat.com/[a-zA-Z]+[?#]*$").search
 
 
 def download(url, path, file_name=""):
