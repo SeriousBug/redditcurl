@@ -109,9 +109,10 @@ class TestDownloadInfo(unittest.TestCase):
 
 class TestMakeFolders(test_base.EnterTemp):
     def test_make_folders(self):
-        manager.make_folders(["testfolder", "otherfolder"])
+        manager.make_folders(["testfolder", "otherfolder", "sub"])
         self.assertTrue(os.path.isdir("testfolder"))
         self.assertTrue(os.path.isdir("otherfolder"))
+        self.assertTrue(os.path.isdir("sub"))
 
     def test_make_subfolders(self):
         manager.make_folders(["testfolder/subfolder", "testfolder/otherfolder"])
@@ -157,3 +158,25 @@ class TestProcessSubmission(unittest.TestCase):
         # None should pass, all are from wrong subreddit
         self.assertEqual(len(download_queue), 0)
 
+
+class TestDownloadSubmission(test_base.EnterTemp):
+    @mock.patch("redditcurl.manager.manage_download")
+    @mock.patch("redditcurl.manager.make_folders")
+    @mock.patch("redditcurl.manager.cleanup_folders")
+    def test_single_thread(self, mocked_cleanup, mocked_make, mocked_download):
+        mocked_download.return_value = ("", True)
+        results = manager.download_submissions(test_submissions, ".", 1, use_titles=True, use_folders=False)
+        self.assertTrue(len(results) == len(test_submissions))
+        expected_download_calls = [mock.call(sub.url, ".", sub.title) for sub in test_submissions]
+        mocked_download.assert_has_calls(expected_download_calls, any_order=True)
+
+    @mock.patch("multiprocessing.pool.Pool.starmap")
+    @mock.patch("redditcurl.manager.make_folders")
+    @mock.patch("redditcurl.manager.cleanup_folders")
+    def test_multi_thread(self, mocked_cleanup, mocked_make, mocked_starmap):
+        manager.download_submissions(test_submissions, ".", 2, use_titles=True, use_folders=False)
+        expected_queue, expected_folders = manager.process_submissions(test_submissions, ".",
+                                                                       use_titles=True,
+                                                                       use_folders=False,
+                                                                       only_from=[])
+        mocked_starmap.assert_called_once_with(manager.manage_download, expected_queue)

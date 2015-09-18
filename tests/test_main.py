@@ -5,8 +5,11 @@ from tests import test_base
 from redditcurl import __main__ as main
 
 
+test_links = test_base.test_links
 test_args = test_base.test_args
 test_config = test_base.test_config
+test_downloaded = test_base.test_downloaded
+
 
 class TestArguments(unittest.TestCase):
     def test_args2dict(self):
@@ -68,3 +71,20 @@ class TestConfig(test_base.EnterTemp):
         self.assertEqual(conf.getint("processes"), 10)
         self.assertTrue(conf.getboolean("subfolders"))
         self.assertTrue(conf.getboolean("notitles"))
+
+
+class TestCountSuccess(unittest.TestCase):
+    def test_count_success(self):
+        mocked_saved = mock.MagicMock()
+        # Do try removing saved images, do not print anything
+        scount, fcount, sdown = main.count_success(test_downloaded, True, (lambda x: None), mocked_saved)
+        # There should be only a single failed link, see test_base.mocked_saved
+        self.assertEqual(scount, len(test_links) - 1)
+        self.assertEqual(fcount, 1)
+        self.assertEqual(len(sdown), len(test_links) - 1)
+        self.assertNotIn(test_links["fail"], sdown)
+        # Make sure everything except the failed link was deleted.
+        # The function should only access them if it is going to unsave them, so checking that is enough.
+        self.assertEqual(mocked_saved.__getitem__.call_count, len(test_links) - 1)
+        fail_index = test_downloaded.index((test_links["fail"], False))
+        self.assertNotIn(mock.call(fail_index), mocked_saved.__getitem__.call_args_list)

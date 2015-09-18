@@ -39,6 +39,8 @@ def create_submission(url="", title="", subreddit=""):
 
 
 test_submissions = [create_submission(url, title, "testsubreddit") for title, url in test_links.items()]
+test_downloaded = [(url, (lambda x: x != "fail")(title)) for title, url in test_links.items()]
+# Creates a downloaded items list, with all test links as successfully downloaded except "fail" link.
 
 
 class EnterTemp(unittest.TestCase):
