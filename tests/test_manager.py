@@ -47,6 +47,10 @@ class TestManageDownloadErrors(test_base.EnterTemp):
         self.assertEqual(manager.manage_download(test_links_404["direct"], "path", "file"),
                          (test_links_404["direct"], False))
 
+    def test_gfycat(self):
+        self.assertEqual(manager.manage_download(test_links_404["gfycat"], "path", "file"),
+                         (test_links_404["gfycat"], False))
+
     def test_imgur_album(self):
         self.assertEqual(manager.manage_download(test_links_404["imgur_album"], "path", "file"),
                          (test_links_404["imgur_album"], False))
