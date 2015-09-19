@@ -29,6 +29,14 @@ processes = 0
 notitles = true
 """
 
+test_config_auth = """
+[oauth]
+clientid = testid
+redirect = http://testredirect
+refresh_token = refreshtoken
+access_token = accesstoken
+"""
+
 
 def create_submission(url="", title="", subreddit=""):
     submission = MagicMock()
