@@ -29,6 +29,9 @@ class TestMatcher(unittest.TestCase):
     def test_tumblr_link(self):
         self.assertTrue(websites.tumblr_link.match(test_links["tumblr_link"]))
 
+    def test_deviantart(self):
+        self.assertTrue(websites.deviantart.match(test_links["deviantart"]))
+
     def test_fail(self):
         self.assertFalse(websites.direct.match(test_links["fail"]))
         self.assertFalse(websites.imgur_link.match(test_links["fail"]))
@@ -70,6 +73,10 @@ class TestDownloadNamed(test_base.EnterTemp):
         websites.tumblr_link.download(test_links["tumblr_link"], "", "bebop")
         self.assertTrue(os.path.isfile("bebop.jpeg"))
 
+    def test_deviantart(self):
+        websites.deviantart.download(test_links["deviantart"], "", "oblivion")
+        self.assertTrue(os.path.isfile("oblivion.jpeg"))
+
 
 class TestDownloadUnnamed(test_base.EnterTemp):
     def test_direct(self):
@@ -104,6 +111,10 @@ class TestDownloadUnnamed(test_base.EnterTemp):
         websites.tumblr_link.download(test_links["tumblr_link"], "", "")
         self.assertTrue(os.path.isfile("tumblr_niwgy0oXdq1tv7a6ao1_500.jpeg"))
 
+    def test_deviantart(self):
+        websites.deviantart.download(test_links["deviantart"], "", "")
+        self.assertTrue(os.path.isfile("oblivion_of_mehrunes_by_magusverus.jpeg"))
+
 
 class TestDownloadPath(test_base.EnterTemp):
     def test_direct(self):
@@ -137,3 +148,7 @@ class TestDownloadPath(test_base.EnterTemp):
     def test_tumblr_link(self):
         websites.tumblr_link.download(test_links["tumblr_link"], "sub", "bebop")
         self.assertTrue(os.path.isfile("sub/bebop.jpeg"))
+
+    def test_deviantart(self):
+        websites.deviantart.download(test_links["deviantart"], "sub", "oblivion")
+        self.assertTrue(os.path.isfile("sub/oblivion.jpeg"))

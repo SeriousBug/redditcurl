@@ -67,6 +67,10 @@ class TestManageDownloadErrors(test_base.EnterTemp):
         self.assertEqual(manager.manage_download(test_links_404["tumblr_link"], "path", "file"),
                          (test_links_404["tumblr_link"], False))
 
+    def test_deviantart(self):
+        self.assertEqual(manager.manage_download(test_links_404["deviantart"], "path", "file"),
+                         (test_links_404["deviantart"], False))
+
     def test_failing_download(self):
         self.assertEqual(manager.manage_download(test_links["fail"], "path", "file"),
                          (test_links["fail"], False))

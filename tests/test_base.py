@@ -13,6 +13,7 @@ test_links = {
     "imgur_gifv": "https://i.imgur.com/bJ0h81c.gifv",
     "redditbooru_gallery": "http://awwnime.redditbooru.com/gallery/nchg/chiyo-chan/",
     "tumblr_link": "http://cowboy-bebop.tumblr.com/post/111839970633",
+    "deviantart": "http://magusverus.deviantart.com/art/Oblivion-of-Mehrunes-153808629",
     "fail": "https://github.com/SeriousBug/redditcurl"
     }
 
@@ -24,6 +25,7 @@ test_links_404 = {
     "imgur_gifv": "https://i.imgur.com/00000000.gifv",
     "redditbooru_gallery": "http://awwnime.redditbooru.com/gallery/000000/000000000/",
     "tumblr_link": "http://cowboy-bebop.tumblr.com/___/0000000",
+    "deviantart": "http://magusverus.deviantart.com/art/Oblivion-of-Mehrunes-000000000"
     }
 
 test_args = [ "--savedir", "testdir"
