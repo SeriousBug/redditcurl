@@ -2,9 +2,10 @@ redditcurl
 ==========
     
 .. image:: https://travis-ci.org/SeriousBug/redditcurl.svg?branch=master
-        :target: https://travis-ci.org/SeriousBug/redditcurl
+   :target: https://travis-ci.org/SeriousBug/redditcurl
 
-.. image:: https://coveralls.io/repos/SeriousBug/redditcurl/badge.svg?branch=master&service=github :target: https://coveralls.io/github/SeriousBug/redditcurl?branch=master
+.. image:: https://coveralls.io/repos/SeriousBug/redditcurl/badge.svg?branch=master&service=github
+   :target: https://coveralls.io/github/SeriousBug/redditcurl?branch=master
 
 
 redditcurl is a small tool to download the pages you have saved on Reddit.
