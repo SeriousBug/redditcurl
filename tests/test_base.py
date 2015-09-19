@@ -16,6 +16,15 @@ test_links = {
     "fail": "https://github.com/SeriousBug/redditcurl"
     }
 
+test_links_404 = {
+    "direct": "https://i.imgur.com/000000.jpg",
+    "gfycat": "https://gfycat.com/00000000000000",
+    "imgur_link": "https://imgur.com/000000000",
+    "imgur_album": "https://imgur.com/a/00000000000",
+    "imgur_gifv": "https://i.imgur.com/00000000.gifv",
+    "redditbooru_gallery": "http://awwnime.redditbooru.com/gallery/000000/000000000/",
+    "tumblr_link": "http://cowboy-bebop.tumblr.com/___/0000000",
+    }
 
 test_args = [ "--savedir", "testdir"
             , "--processes", "10"

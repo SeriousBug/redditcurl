@@ -21,6 +21,7 @@ from zipfile import ZipFile
 import shutil
 import re
 import os
+from redditcurl.exceptions import DownloadError
 
 match = re.compile("imgur.com/a/").search
 
@@ -44,6 +45,8 @@ def download(url, path, file_name=""):
     if path == "":
         path = "."
     response = requests.get("{}/zip".format(url))
+    if not response.ok:
+        raise DownloadError("Failed downloading imgur album {}".format(url))
     with tempfile.TemporaryFile(mode="w+b") as file:
         file.write(response.content)
         file.seek(0)

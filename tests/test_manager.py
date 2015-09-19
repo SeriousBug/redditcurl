@@ -8,6 +8,7 @@ from redditcurl import manager
 
 
 test_links = test_base.test_links
+test_links_404 = test_base.test_links_404
 test_submissions = test_base.test_submissions
 original_urls = [submission.url for submission in test_submissions]
 original_titles = [submission.title for submission in test_submissions]
@@ -39,6 +40,28 @@ class TestManageDownload(test_base.EnterTemp):
     def test_tumblr_link(self, mocked):
         manager.manage_download(test_links["tumblr_link"], "path", "file")
         mocked.assert_called_once_with(test_links["tumblr_link"], "path", "file")
+
+
+class TestManageDownloadErrors(test_base.EnterTemp):
+    def test_direct(self):
+        self.assertEqual(manager.manage_download(test_links_404["direct"], "path", "file"),
+                         (test_links_404["direct"], False))
+
+    def test_imgur_album(self):
+        self.assertEqual(manager.manage_download(test_links_404["imgur_album"], "path", "file"),
+                         (test_links_404["imgur_album"], False))
+
+    def test_imgur_link(self):
+        self.assertEqual(manager.manage_download(test_links_404["imgur_link"], "path", "file"),
+                         (test_links_404["imgur_link"], False))
+
+    def test_redditbooru_gallery(self):
+        self.assertEqual(manager.manage_download(test_links_404["redditbooru_gallery"], "path", "file"),
+                         (test_links_404["redditbooru_gallery"], False))
+
+    def test_tumblr_link(self):
+        self.assertEqual(manager.manage_download(test_links_404["tumblr_link"], "path", "file"),
+                         (test_links_404["tumblr_link"], False))
 
     def test_failing_download(self):
         self.assertEqual(manager.manage_download(test_links["fail"], "path", "file"),

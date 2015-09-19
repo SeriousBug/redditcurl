@@ -18,6 +18,7 @@
 import requests
 from bs4 import BeautifulSoup
 from redditcurl.websites import direct
+from redditcurl.exceptions import DownloadError
 import re
 
 match = re.compile("redditbooru.com/gallery/").search
@@ -36,8 +37,12 @@ def download(url, path, file_name=""):
             the names they have on the server.
     """
     response = requests.get(url)
+    if not response.ok:
+        raise DownloadError("Unable to download redditbooru gallery {}".format(url))
     soup = BeautifulSoup(response.content, "html.parser")
     images = soup.find_all("img")
+    if len(images) < 1:
+        raise DownloadError("Empty redditbooru gallery {}".format(url))
     if file_name == "":
         for image in images:
             direct.download(image["src"], path, file_name)

@@ -3,6 +3,7 @@ import argparse
 import configparser
 import praw
 from redditcurl import manager
+from redditcurl.exceptions import ConfigError
 
 
 DEFAULTS = {"processes":  "20",
@@ -19,10 +20,6 @@ OAUTH_DEFAULTS = {"clientid": "Fp9ci3HipOW1FQ",
 }
 
 OAUTH_SCOPES = {"identity", "history"}
-
-class ConfigError(Exception):
-    """The exception which is raised when a required configuration was not set."""
-    pass
 
 
 def setup_parser():

@@ -21,6 +21,9 @@ import multiprocessing
 import gzip
 import json
 from redditcurl import websites
+from redditcurl.exceptions import DownloadError
+from requests.exceptions import RequestException
+
 
 # All file names will be translated according to _FILENAME_MAP, in order to remove characters
 # that can't be used as the file name.
@@ -64,7 +67,7 @@ def manage_download(url, path, file_name=""):
                 downloader.download(url, path, file_name)
                 return url, True
         return url, False
-    except (OSError, IOError, AttributeError, IndexError):
+    except (OSError, IOError, AttributeError, IndexError, ValueError, DownloadError, RequestException):
         return url, False
 
 

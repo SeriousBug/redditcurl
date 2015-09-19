@@ -15,6 +15,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
+from redditcurl.exceptions import DownloadError
 import requests
 
 _IMAGE_FORMATS = ['bmp', 'dib', 'eps', 'ps', 'gif', 'im', 'jpg', 'jpe', 'jpeg',
@@ -54,6 +55,8 @@ def download(url, path, file_name=""):
             file_name is an empty string, then name of the downloaded file will be used.
     """
     response = requests.get(url)
+    if not response.ok:
+        raise DownloadError("Download of {} failed.".format(url))
     if file_name == "":
         base_name = url.split('/')[-1].split('.')[0]
     else:
