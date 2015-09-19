@@ -1,3 +1,20 @@
+"""
+    redditcurl, download the images you saved on Reddit.
+    Copyright (C) 2015  Kaan Genç
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+"""
 import os
 import argparse
 import configparser
@@ -12,12 +29,10 @@ DEFAULTS = {"processes":  "20",
             "notitles":   "false",
             "savefile":   ".downloaded.gz",
             "remove":     "false",
-            "silent":     "false"            
-}
+            "silent":     "false"}
 
 OAUTH_DEFAULTS = {"clientid": "Fp9ci3HipOW1FQ",
-                  "redirect": "http://kaangenc.me/static/redditcurl.html"
-}
+                  "redirect": "http://kaangenc.me/static/redditcurl.html"}
 
 OAUTH_SCOPES = {"identity", "history"}
 
@@ -49,7 +64,7 @@ def setup_parser():
                         help="Remove the files that were successfully downloaded from saved.")
     parser.add_argument("-s", "--silent", action="store_true",
                         help="Do not print anything about the scripts actions.")
-    return parser    
+    return parser
 
 
 def find_config():
@@ -64,10 +79,10 @@ def args2dict(args):
     """Convert the arguments into a dictionary to be read by ConfigParser.
 
     The values that are not set in the command line, meaning the ones that are None
-    or False are skipped. All values are turned into strings, so that ConfigParser 
+    or False are skipped. All values are turned into strings, so that ConfigParser
     can read them."""
-    return {k: str(v) for k, v in vars(args).items() if not (v is None or v is  False)}
-    
+    return {k: str(v) for k, v in vars(args).items() if not (v is None or v is False)}
+
 
 def get_config(args, config_file):
     """Decide on the program configuration.
@@ -94,7 +109,7 @@ def get_config(args, config_file):
     config.read(config_file)
     config.read_dict({"redditcurl": args2dict(args)})
     # Check if the required fields have been filled
-    if not "savedir" in config["redditcurl"]:
+    if "savedir" not in config["redditcurl"]:
         raise ConfigError("No save directory set!")
     return config
 
@@ -149,8 +164,7 @@ def __main__():
             access_information = r.get_access_information(auth_code)
             conf.read_dict({"oauth":
                             {"refresh_token": access_information["refresh_token"],
-                             "access_token": access_information["access_token"]}
-            })
+                             "access_token": access_information["access_token"]}})
             with open(conf_path, "w") as conf_file:
                 conf.write(conf_file)
         else:
@@ -163,7 +177,7 @@ def __main__():
         prints("Getting data...")
         try:
             os.makedirs(conf_r.get("savedir"))
-        except (FileExistsError):
+        except FileExistsError:
             # If the save directory exists, we don't need to create it
             pass
         save_file = os.path.join(conf_r.get("savedir"), conf_r.get("savefile"))

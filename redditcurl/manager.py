@@ -36,8 +36,7 @@ if sys.platform == "win32" or sys.platform == "cygwin":
                      ord("|"): None,
                      ord("\""): None,
                      ord("<"): None,
-                     ord(">"): None
-                     }
+                     ord(">"): None}
 else:
     _FILENAME_MAP = {ord("/"): None}
 
@@ -61,8 +60,7 @@ def manage_download(url, path, file_name=""):
         Otherwise, False.
     """
     try:
-        # websites module lists all supported downloaders under __all__
-        for downloader in websites.__all__:
+        for downloader in websites.downloaders:
             if downloader.match(url):
                 downloader.download(url, path, file_name)
                 return url, True
@@ -104,7 +102,7 @@ def make_folders(used_folders):
     for folder in used_folders:
         try:
             os.makedirs(folder)
-        except (FileExistsError):
+        except FileExistsError:
             pass
 
 
@@ -113,7 +111,7 @@ def cleanup_folders(used_folders):
     for folder in used_folders:
         try:
             os.removedirs(folder)
-        except (OSError):
+        except OSError:
             pass
 
 
@@ -163,7 +161,7 @@ def filter_new(submission_list, downloaded_file):
     try:
         with gzip.open(downloaded_file) as file:
             downloaded = json.loads(file.read().decode("utf-8"))
-    except (FileNotFoundError):
+    except FileNotFoundError:
         downloaded = []
     # Filter to allow only new link posts
     filtered = [submission for submission in submission_list
@@ -183,6 +181,6 @@ def update_new(saved_list, downloaded_file):
         with gzip.open(downloaded_file, "rb") as file:
             old_list = json.loads(file.read().decode("utf-8"))
     except FileNotFoundError:
-            old_list = []
+        old_list = []
     with gzip.open(downloaded_file, "wb") as file:
         file.write(json.dumps(old_list + saved_list).encode("utf-8"))

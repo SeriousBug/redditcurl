@@ -103,7 +103,7 @@ Adding support for new websites to redditcurl is easy. You will need to write a 
 ``download(url, path, filename="")``
   Accepts 3 strings; 'url', the image that will be downloaded, 'path', the directory where the downloaded image will be saved, and 'filename', the name that should be given to this file. Note that filename can be an empty string, in which case the downloader should keep the name of the file as it is on the website. Also keep in mind that filename will not contain the extension of the file, the downloader should add the extension.
 
-Place this package or file into ``redditcurl/websites``, and edit ``redditcurl/websites/__init__.py`` to import this new package and add it into ``__all__``.
+Place this package or file into ``redditcurl/websites``, and edit ``redditcurl/websites/__init__.py`` to import this new package and add it into ``downloaders`` list.
 
 Licensing
 ---------
