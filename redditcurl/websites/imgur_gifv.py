@@ -15,13 +15,11 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
-from redditcurl.websites import direct
 import re
+from redditcurl.websites import direct
+from redditcurl.websites import shared_config
 
 match = re.compile("imgur.com/[\S]+[.]gifv").search
-
-# If false, MP4 will be downloaded instead.
-PREFER_WEBM = True
 
 
 def download(url, path, file_name=""):
@@ -36,8 +34,8 @@ def download(url, path, file_name=""):
     # From an url "http://i.imgur.com/abcdef.gifv", first extract "abcdef.gifv" then
     # delete the extension to get "abcdef"
     download_name = url.split('/')[-1][:-5]
-    if PREFER_WEBM:
-        extension = "webm"
-    else:
+    if shared_config.PREFER_MP4:
         extension = "mp4"
+    else:
+        extension = "webm"
     direct.download("https://i.imgur.com/{}.{}".format(download_name, extension), path, file_name)

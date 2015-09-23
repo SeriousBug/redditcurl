@@ -20,6 +20,7 @@ import argparse
 import configparser
 import praw
 from redditcurl import manager
+from redditcurl.websites import shared_config
 from redditcurl.exceptions import ConfigError
 
 
@@ -27,6 +28,7 @@ DEFAULTS = {"processes":  "20",
             "subfolders": "false",
             "subreddits": "",
             "notitles":   "false",
+            "prefer-mp4": "false",
             "savefile":   ".downloaded.gz",
             "remove":     "false",
             "silent":     "false"}
@@ -58,6 +60,8 @@ def setup_parser():
     parser.add_argument("-n", "--notitles", action="store_true",
                         help="Do not use titles of submissions as file names, "
                         "use the names of downloaded files instead.")
+    parser.add_argument("-m", "--prefer-mp4", action="store_true",
+                        help="In gfycat and imgur gifv links, download mp4's instead of webm.")
     parser.add_argument("-f", "--savefile", type=str,
                         help="The file to keep track of images that have been downloaded.")
     parser.add_argument("-r", "--remove", action="store_true",
@@ -153,6 +157,8 @@ def __main__():
         else:
             subreddits = conf_r.get("subreddits").strip(',').casefold().split(',')
             prints("Downloading from {}".format(', '.join(subreddits)))
+        if conf_r.getboolean("prefer-mp4"):
+            shared_config.PREFER_WEBM = False
         r = praw.Reddit(user_agent="redditcurl")
         r.set_oauth_app_info(client_id=conf_o.get("clientid"),
                              redirect_uri=conf_o.get("redirect"),

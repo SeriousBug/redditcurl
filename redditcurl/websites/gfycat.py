@@ -19,9 +19,9 @@ import requests
 import json
 import re
 from redditcurl.websites import direct
+from redditcurl.websites import shared_config
 
 _GFYCAT_API_URL = "https://gfycat.com/cajax/get/{}"
-PREFER_WEBM = True
 
 match = re.compile("^https?://(www[.])?gfycat.com/[a-zA-Z]+[?#]*$").search
 
@@ -41,8 +41,8 @@ def download(url, path, file_name=""):
     image_name = url.split("/")[-1]
     api_request = requests.get(_GFYCAT_API_URL.format(image_name))
     api_data = json.loads(api_request.content.decode("utf-8"))
-    if PREFER_WEBM:
-        file_type = "webmUrl"
-    else:
+    if shared_config.PREFER_MP4:
         file_type = "mp4Url"
+    else:
+        file_type = "webmUrl"
     direct.download(api_data["gfyItem"][file_type], path, file_name)

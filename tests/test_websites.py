@@ -1,5 +1,6 @@
 import os
 import unittest
+from unittest import mock
 from tests import test_base
 from redditcurl import websites
 
@@ -152,3 +153,19 @@ class TestDownloadPath(test_base.EnterTemp):
     def test_deviantart(self):
         websites.deviantart.download(test_links["deviantart"], "sub", "oblivion")
         self.assertTrue(os.path.isfile("sub/oblivion.jpeg"))
+
+
+class TestSharedConfig(test_base.EnterTemp):
+    """Test the alternative configurations for the downloaders."""
+
+    @mock.patch("redditcurl.websites.shared_config.PREFER_MP4", new=True)
+    def test_gfycat_mp4(self):
+        websites.gfycat.download(test_links["gfycat"], "", "Penguin in snow")
+        print(os.listdir())
+        self.assertTrue(os.path.isfile("Penguin in snow.mp4"))
+
+
+    @mock.patch("redditcurl.websites.shared_config.PREFER_MP4", new=True)
+    def test_imgur_gifv_mp4(self):
+        websites.imgur_gifv.download(test_links["imgur_gifv"], "", "walking penguin")
+        self.assertTrue(os.path.isfile("walking penguin.mp4"))
