@@ -160,7 +160,7 @@ def filter_new(submission_list, downloaded_file):
     """
     try:
         with gzip.open(downloaded_file) as file:
-            downloaded = json.loads(file.read().decode("utf-8"))
+            downloaded = set(json.loads(file.read().decode("utf-8")))
     except FileNotFoundError:
         downloaded = []
     # Filter to allow only new link posts
