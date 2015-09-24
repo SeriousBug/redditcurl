@@ -161,7 +161,6 @@ class TestSharedConfig(test_base.EnterTemp):
     @mock.patch("redditcurl.websites.shared_config.PREFER_MP4", new=True)
     def test_gfycat_mp4(self):
         websites.gfycat.download(test_links["gfycat"], "", "Penguin in snow")
-        print(os.listdir())
         self.assertTrue(os.path.isfile("Penguin in snow.mp4"))
 
 
