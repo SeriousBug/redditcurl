@@ -76,8 +76,8 @@ class TestConfig(test_base.EnterTemp):
 class TestCountSuccess(unittest.TestCase):
     def test_count_success(self):
         mocked_saved = mock.MagicMock()
-        # Do try removing saved images, do not print anything
-        scount, fcount, sdown = main.count_success(test_downloaded, True, (lambda x: None), mocked_saved)
+        # Do try removing saved images
+        scount, fcount, sdown = main.count_success(test_downloaded, True, mocked_saved)
         # There should be only a single failed link, see test_base.mocked_saved
         self.assertEqual(scount, len(test_links) - 1)
         self.assertEqual(fcount, 1)
@@ -122,7 +122,7 @@ class TestMain(test_base.EnterTemp):
         mocked_download.assert_called_once_with(test_base.test_submissions,
                                                 "sub", 5, True, False, [])
         # We can't really check the other args
-        mdownloaded, mremove, _, _ = mocked_count.call_args[0]
+        mdownloaded, mremove, _ = mocked_count.call_args[0]
         self.assertEqual((mdownloaded, mremove), (test_base.test_downloaded, False))
 
     @mock.patch("praw.Reddit")
@@ -158,5 +158,5 @@ class TestMain(test_base.EnterTemp):
         mocked_download.assert_called_once_with(test_base.test_submissions,
                                                 "sub", 5, True, False, [])
         # We can't really check the other args
-        mdownloaded, mremove, _, _ = mocked_count.call_args[0]
+        mdownloaded, mremove, _ = mocked_count.call_args[0]
         self.assertEqual((mdownloaded, mremove), (test_base.test_downloaded, False))

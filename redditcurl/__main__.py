@@ -16,6 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 import os
+import sys
+import logging
 import argparse
 import configparser
 import praw
@@ -118,8 +120,9 @@ def get_config(args, config_file):
     return config
 
 
-def count_success(downloaded, remove, prints, saved):
+def count_success(downloaded, remove, saved):
     """Count the successful downloads."""
+    logger = logging.getLogger("main")
     success_count = 0
     fail_count = 0
     successful_downloads = []
@@ -127,7 +130,7 @@ def count_success(downloaded, remove, prints, saved):
         url, successful = submission
         if not successful:
             fail_count += 1
-            prints("Download failed: {}".format(url))
+            logger.warning("Download failed: {}".format(url))
         else:  # successful
             success_count += 1
             successful_downloads.append(url)
@@ -141,6 +144,43 @@ def is_authenticated(conf):
     return all(("access_token" in conf, "refresh_token" in conf))
 
 
+def setup_logger(name, silent):
+    """Setup a logger to handle information and error messages.
+
+    Info messages are printed to stdout, without any formatting.
+    Other messages, such as errors or debug messages are written to
+    stderr alongside log level and logger name.
+
+    Args:
+        name: The name of the logger, used in warning, error and debug messages.
+        silent: If true, info messages won't be printed.
+    Returns:
+        A logging.Logger object, which can be used with the methods such as
+        info, warning and error to print messages.
+    """
+    if silent:
+        loglevel = logging.WARNING
+    else:
+        loglevel = logging.INFO
+    logger = logging.getLogger(name)
+    logger.setLevel(loglevel)
+    # Logging for info messages
+    info_handler = logging.StreamHandler(stream=sys.stdout)
+    info_handler.setLevel(logging.INFO)
+    info_formatter = logging.Formatter("%(message)s")
+    info_handler.setFormatter(info_formatter)
+    info_handler.addFilter(lambda r: r.levelno == logging.INFO)
+    # Logging for error messages
+    err_handler = logging.StreamHandler(stream=sys.stderr)
+    err_handler.setLevel(logging.DEBUG)
+    err_formatter = logging.Formatter("%(levelname)s %(name)s: %(message)s")
+    err_handler.setFormatter(err_formatter)
+    err_handler.addFilter(lambda r: r.levelno != logging.INFO)
+    logger.addHandler(info_handler)
+    logger.addHandler(err_handler)
+    return logger
+
+
 def __main__():
     try:
         args = setup_parser().parse_args()
@@ -148,17 +188,15 @@ def __main__():
         conf = get_config(args, conf_path)
         conf_r = conf["redditcurl"]
         conf_o = conf["oauth"]
-        if conf_r.getboolean("silent"):
-            prints = lambda x: None
-        else:
-            prints = print
+        logger = setup_logger("main", conf_r.getboolean("silent"))
         if conf_r.get("subreddits") == "":
             subreddits = []
         else:
             subreddits = conf_r.get("subreddits").strip(',').casefold().split(',')
-            prints("Downloading from {}".format(', '.join(subreddits)))
+            logger.info("Downloading from {}".format(', '.join(subreddits)))
         if conf_r.getboolean("prefer-mp4"):
             shared_config.PREFER_WEBM = False
+        logger.info("Connecting to Reddit.")
         r = praw.Reddit(user_agent="redditcurl")
         r.set_oauth_app_info(client_id=conf_o.get("clientid"),
                              redirect_uri=conf_o.get("redirect"),
@@ -177,10 +215,10 @@ def __main__():
             r.set_access_credentials(scope=OAUTH_SCOPES,
                                      access_token=conf_o.get("access_token"),
                                      refresh_token=conf_o.get("refresh_token"))
-            prints("Refreshing access token.")
+            logger.info("Refreshing access token.")
             r.refresh_access_information(conf_o.get("refresh_token"))
             # We don't save the new access_token here, since we refresh it every time the program is run
-        prints("Getting data...")
+        logger.info("Getting data...")
         try:
             os.makedirs(conf_r.get("savedir"))
         except FileExistsError:
@@ -188,19 +226,19 @@ def __main__():
             pass
         save_file = os.path.join(conf_r.get("savedir"), conf_r.get("savefile"))
         saved = manager.filter_new(r.user.get_saved(limit=None), save_file)
-        prints("Starting to download, using {} processes.".format(conf_r.get("processes")))
+        logger.info("Starting to download, using {} processes.".format(conf_r.get("processes")))
         downloaded = manager.download_submissions(saved, conf_r.get("savedir"), conf_r.getint("processes"),
                                                   not conf_r.getboolean("notitles"),
                                                   conf_r.getboolean("subfolders"), subreddits)
-        prints("Processed {} urls.".format(len(downloaded)))
+        logger.info("Processed {} urls.".format(len(downloaded)))
         remove = conf_r.getboolean("remove")
-        success_count, fail_count, successful_downloads = count_success(downloaded, remove, prints, saved)
-        prints("Updating saved files list.")
+        success_count, fail_count, successful_downloads = count_success(downloaded, remove, saved)
+        logger.info("Updating saved files list.")
         manager.update_new(successful_downloads, save_file)
-        prints("\nDownloading finished.")
-        prints("Successful: {} \t Failed: {}".format(success_count, fail_count))
+        logger.info("\nDownloading finished.")
+        logger.info("Successful: {} \t Failed: {}".format(success_count, fail_count))
     except (ConfigError) as err:
-        print(err)
+        logger.error(err)
 
 
 if __name__ == "__main__":
