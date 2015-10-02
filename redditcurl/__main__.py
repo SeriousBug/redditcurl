@@ -21,6 +21,7 @@ import logging
 import argparse
 import configparser
 import praw
+import requests
 from redditcurl import manager
 from redditcurl.websites import shared_config
 from redditcurl.exceptions import ConfigError
@@ -237,8 +238,12 @@ def __main__():
         manager.update_new(successful_downloads, save_file)
         logger.info("\nDownloading finished.")
         logger.info("Successful: {} \t Failed: {}".format(success_count, fail_count))
-    except (ConfigError) as err:
+    except (praw.errors.PRAWException,
+            requests.exceptions.RequestException) as err:
         logger.error(err)
+    except ConfigError as err:
+        # When a ConfigError occurs, the logger isn't set up yet, so use the default logger
+        logging.error(err)
 
 
 if __name__ == "__main__":
