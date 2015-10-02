@@ -28,17 +28,17 @@ from requests.exceptions import RequestException
 # All file names will be translated according to _FILENAME_MAP, in order to remove characters
 # that can't be used as the file name.
 if sys.platform == "win32" or sys.platform == "cygwin":
-    _FILENAME_MAP = {ord("/"): None,
-                     ord("\\"): None,
-                     ord("?"): None,
-                     ord("*"): None,
-                     ord(":"): None,
-                     ord("|"): None,
-                     ord("\""): None,
-                     ord("<"): None,
-                     ord(">"): None}
+    _FILENAME_MAP = {ord("/"): " ",
+                     ord("\\"): " ",
+                     ord("?"): " ",
+                     ord("*"): " ",
+                     ord(":"): " ",
+                     ord("|"): " ",
+                     ord("\""): " ",
+                     ord("<"): " ",
+                     ord(">"): " "}
 else:
-    _FILENAME_MAP = {ord("/"): None}
+    _FILENAME_MAP = {ord("/"): " "}
 
 
 def manage_download(url, path, file_name=""):

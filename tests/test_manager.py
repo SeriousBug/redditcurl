@@ -135,7 +135,7 @@ class TestDownloadInfo(unittest.TestCase):
     def test_special_title(self):
         submission = test_base.create_submission(title=".title w/ special characters", subreddit="testsubreddit")
         folder, title = manager.download_info(submission, "testfolder", True, True)
-        self.assertEqual(title, "title w special characters")
+        self.assertEqual(title, "title w  special characters")
 
 
 class TestMakeFolders(test_base.EnterTemp):
