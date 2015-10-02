@@ -104,7 +104,7 @@ class TestMain(test_base.EnterTemp):
         # Mock the argument parser
         mocked_parser.return_value.parse_args.return_value.__dict__ = {"savedir": "sub",
                                                                        "processes": 5,
-                                                                       "silent": True}
+                                                                       "silent": False,}
         mocked_input.return_value = "auth code"
         mocked_reddit = mocked_praw.return_value
         mocked_reddit.get_access_information.return_value = {"refresh_token": "refresh token",
@@ -160,3 +160,72 @@ class TestMain(test_base.EnterTemp):
         # We can't really check the other args
         mdownloaded, mremove, _ = mocked_count.call_args[0]
         self.assertEqual((mdownloaded, mremove), (test_base.test_downloaded, False))
+
+    @mock.patch("praw.Reddit")
+    @mock.patch("os.environ")
+    @mock.patch("redditcurl.__main__.setup_parser")
+    @mock.patch("redditcurl.__main__.count_success")
+    @mock.patch("redditcurl.manager.download_submissions")
+    @mock.patch("redditcurl.manager.update_new")
+    def test_main_subs_mp4(self, mocked_update, mocked_download,
+                           mocked_count, mocked_parser, mocked_environ,
+                           mocked_praw):
+        # Mock the argument parser
+        mocked_parser.return_value.parse_args.return_value.__dict__ = {"savedir": "sub",
+                                                                       "processes": 5,
+                                                                       "silent": True,
+                                                                       "prefer-mp4": True,
+                                                                       "subreddits": "testsubreddit,test,example,"}
+        mocked_reddit = mocked_praw.return_value
+        # Mock the configuration directory to be the current temporary directory
+        mocked_environ.get.return_value = os.getcwd()
+        # Write a test configuration
+        with open("redditcurl", "w") as conf_file:
+            conf_file.write(test_base.test_config_auth)
+        mocked_reddit.user.get_saved.return_value = test_base.test_submissions
+        mocked_download.return_value = test_base.test_downloaded
+        mocked_count.return_value = (0, 0, [])
+        main.__main__()
+        mocked_reddit.set_access_credentials.assert_called_once_with(scope=main.OAUTH_SCOPES,
+                                                                     access_token="accesstoken",
+                                                                     refresh_token="refreshtoken")
+        mocked_reddit.refresh_access_information.assert_called_once_with("refreshtoken")
+        mocked_reddit.user.get_saved.assert_called_once_with(limit=None)
+        mocked_download.assert_called_once_with(test_base.test_submissions,
+                                                "sub", 5, True, False, ["testsubreddit", "test", "example"])
+        # We can't really check the other args
+        mdownloaded, mremove, _ = mocked_count.call_args[0]
+        self.assertEqual((mdownloaded, mremove), (test_base.test_downloaded, False))
+        # Note that we don't check if redditcurl.websites.shared_config.PREFER_MP4 was set.
+        # TODO: It might be a good idea to refactor how configuration should be passed to the
+        # downloaders.
+
+    @mock.patch("praw.Reddit")
+    @mock.patch("os.environ")
+    @mock.patch("redditcurl.__main__.setup_parser")
+    @mock.patch("redditcurl.__main__.count_success")
+    @mock.patch("redditcurl.manager.download_submissions")
+    @mock.patch("redditcurl.manager.update_new")
+    def test_main_config_error(self, mocked_update, mocked_download,
+                           mocked_count, mocked_parser, mocked_environ,
+                           mocked_praw):
+        # Mock the argument parser
+        mocked_parser.return_value.parse_args.return_value.__dict__ = {"processes": 5,
+                                                                       "silent": True}
+        mocked_reddit = mocked_praw.return_value
+        # Mock the configuration directory to be the current temporary directory
+        mocked_environ.get.return_value = os.getcwd()
+        # Write a test configuration
+        with open("redditcurl", "w") as conf_file:
+            conf_file.write(test_base.test_config_auth)
+        mocked_reddit.user.get_saved.return_value = test_base.test_submissions
+        mocked_download.return_value = test_base.test_downloaded
+        mocked_count.return_value = (0, 0, [])
+        main.__main__()
+        # The main should exit early because savedir is not set, nothing should run
+        mocked_reddit.set_access_credentials.assert_not_called()
+        mocked_reddit.refresh_access_information.assert_not_called()
+        mocked_reddit.user.get_saved.assert_not_called()
+        mocked_download.assert_not_called()
+        mocked_count.assert_not_called()
+
