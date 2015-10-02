@@ -173,7 +173,7 @@ def setup_logger(name, silent):
     # Logging for error messages
     err_handler = logging.StreamHandler(stream=sys.stderr)
     err_handler.setLevel(logging.DEBUG)
-    err_formatter = logging.Formatter("%(levelname)s %(name)s: %(message)s")
+    err_formatter = logging.Formatter("%(levelname)s - %(name)s: %(message)s")
     err_handler.setFormatter(err_formatter)
     err_handler.addFilter(lambda r: r.levelno != logging.INFO)
     logger.addHandler(info_handler)
