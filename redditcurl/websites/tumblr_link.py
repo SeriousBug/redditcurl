@@ -20,7 +20,11 @@ from bs4 import BeautifulSoup
 from redditcurl.websites import direct
 import re
 
-match = re.compile("tumblr.com/post/[\S]+").search
+
+TUMBLR_API_URL = "https://api.tumblr.com/v2/blog/{domain}/posts?id={post_id}"
+_TUMBLR_REGEXP = re.compile("^https?://([a-zA-Z0-9\-]+[.]tumblr[.]com)/post/([a-zA-Z0-9]+)")
+
+match = _TUMBLR_REGEXP.search
 
 
 def download(url, path, file_name=""):
@@ -32,8 +36,9 @@ def download(url, path, file_name=""):
         file_name: File name to use when saving the image.
             If file_name is an empty string, name of the downloaded file will be used.
     """
-    response = requests.get(url)
-    soup = BeautifulSoup(response.content, "html.parser")
-    post = soup(class_="media")
-    images = post[0]("img", class_=False)
-    direct.download(images[0]["src"], path, file_name)
+    domain, post_id = _TUMBLR_REGEXP.match(url).groups()
+    api_request = requests.get(TUMBLR_API_URL.format(domain=domain, post_id=post_id))
+    photos = api_request.json()["response"]["posts"][0]["photos"]
+    for photo in photos:
+        # Assuming that the first photo in alt_sizes is always the biggest
+        direct.download(photo["alt_sizes"][0]["url"], path, file_name)
