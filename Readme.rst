@@ -16,6 +16,7 @@ redditcurl can handle:
 * Gfycat links
 * Deviantart submissions
 * RedditBooru galleries
+* Twitter posts
 
 Installation
 ------------

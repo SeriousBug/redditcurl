@@ -30,6 +30,9 @@ class TestMatcher(unittest.TestCase):
     def test_deviantart(self):
         self.assertTrue(websites.deviantart.match(test_links["deviantart"]))
 
+    def test_twitter(self):
+        self.assertTrue(websites.twitter.match(test_links["twitter"]))
+
     def test_fail(self):
         for downloader in websites.downloaders:
             self.assertFalse(downloader.match(test_links["fail"]))
@@ -68,6 +71,10 @@ class TestDownloadNamed(test_base.EnterTemp):
         websites.deviantart.download(test_links["deviantart"], "", "oblivion")
         self.assertTrue(os.path.isfile("oblivion.jpeg"))
 
+    def test_twitter(self):
+        websites.twitter.download(test_links["twitter"], "", "rockhopper")
+        self.assertTrue(os.path.isfile("rockhopper.jpeg"))
+
 
 class TestDownloadUnnamed(test_base.EnterTemp):
     def test_direct(self):
@@ -102,6 +109,10 @@ class TestDownloadUnnamed(test_base.EnterTemp):
         websites.deviantart.download(test_links["deviantart"], "", "")
         self.assertTrue(os.path.isfile("oblivion_of_mehrunes_by_magusverus.jpeg"))
 
+    def test_twitter(self):
+        websites.twitter.download(test_links["twitter"], "", "")
+        self.assertTrue(os.path.isfile("CU6oi_pW4AAL45M.jpeg"))
+
 
 class TestDownloadPath(test_base.EnterTemp):
     def test_direct(self):
@@ -135,6 +146,10 @@ class TestDownloadPath(test_base.EnterTemp):
     def test_deviantart(self):
         websites.deviantart.download(test_links["deviantart"], "sub", "oblivion")
         self.assertTrue(os.path.isfile("sub/oblivion.jpeg"))
+
+    def test_twitter(self):
+        websites.twitter.download(test_links["twitter"], "sub", "rockhopper")
+        self.assertTrue(os.path.isfile("sub/rockhopper.jpeg"))
 
 
 class TestSharedConfig(test_base.EnterTemp):
