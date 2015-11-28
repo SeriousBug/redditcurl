@@ -36,10 +36,10 @@ class TestManageDownload(test_base.EnterTemp):
         manager.manage_download(test_links["redditbooru_gallery"], "path", "file")
         mocked.assert_called_once_with(test_links["redditbooru_gallery"], "path", "file")
 
-    @mock.patch("redditcurl.websites.tumblr_link.download")
-    def test_tumblr_link(self, mocked):
-        manager.manage_download(test_links["tumblr_link"], "path", "file")
-        mocked.assert_called_once_with(test_links["tumblr_link"], "path", "file")
+    @mock.patch("redditcurl.websites.twitter.download")
+    def test_twitter(self, mocked):
+        manager.manage_download(test_links["twitter"], "path", "file")
+        mocked.assert_called_once_with(test_links["twitter"], "path", "file")
 
 
 class TestManageDownloadErrors(test_base.EnterTemp):
@@ -63,13 +63,13 @@ class TestManageDownloadErrors(test_base.EnterTemp):
         self.assertEqual(manager.manage_download(test_links_404["redditbooru_gallery"], "path", "file"),
                          (test_links_404["redditbooru_gallery"], False))
 
-    def test_tumblr_link(self):
-        self.assertEqual(manager.manage_download(test_links_404["tumblr_link"], "path", "file"),
-                         (test_links_404["tumblr_link"], False))
-
     def test_deviantart(self):
         self.assertEqual(manager.manage_download(test_links_404["deviantart"], "path", "file"),
                          (test_links_404["deviantart"], False))
+
+    def test_twitter(self):
+        self.assertEqual(manager.manage_download(test_links_404["twitter"], "path", "file"),
+                         (test_links_404["twitter"], False))
 
     def test_failing_download(self):
         self.assertEqual(manager.manage_download(test_links["fail"], "path", "file"),
