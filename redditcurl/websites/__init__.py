@@ -15,6 +15,6 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
-from redditcurl.websites import direct, gfycat, imgur_album, imgur_gifv, imgur_link, redditbooru_gallery, tumblr_link, deviantart
+from redditcurl.websites import direct, gfycat, imgur_album, imgur_gifv, imgur_link, redditbooru_gallery, deviantart
 # Order is important to ensure the correct downloader gets picked
-downloaders = [direct, gfycat, imgur_album, imgur_gifv, imgur_link, redditbooru_gallery, tumblr_link, deviantart]
+downloaders = [direct, gfycat, imgur_album, imgur_gifv, imgur_link, redditbooru_gallery, deviantart]

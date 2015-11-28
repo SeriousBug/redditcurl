@@ -14,7 +14,6 @@ redditcurl can handle:
 * Direct image links
 * imgur links and albums
 * Gfycat links
-* tumblr posts
 * Deviantart submissions
 * RedditBooru galleries
 

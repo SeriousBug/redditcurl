@@ -27,9 +27,6 @@ class TestMatcher(unittest.TestCase):
     def test_redditbooru_gallery(self):
         self.assertTrue(websites.redditbooru_gallery.match(test_links["redditbooru_gallery"]))
 
-    def test_tumblr_link(self):
-        self.assertTrue(websites.tumblr_link.match(test_links["tumblr_link"]))
-
     def test_deviantart(self):
         self.assertTrue(websites.deviantart.match(test_links["deviantart"]))
 
@@ -38,7 +35,6 @@ class TestMatcher(unittest.TestCase):
         self.assertFalse(websites.imgur_link.match(test_links["fail"]))
         self.assertFalse(websites.imgur_album.match(test_links["fail"]))
         self.assertFalse(websites.redditbooru_gallery.match(test_links["fail"]))
-        self.assertFalse(websites.tumblr_link.match(test_links["fail"]))
 
 
 class TestDownloadNamed(test_base.EnterTemp):
@@ -69,10 +65,6 @@ class TestDownloadNamed(test_base.EnterTemp):
         self.assertTrue(os.path.isfile("anime.1.jpeg"))
         self.assertTrue(os.path.isfile("anime.2.jpeg"))
         self.assertTrue(os.path.isfile("anime.3.jpeg"))
-
-    def test_tumblr_link(self):
-        websites.tumblr_link.download(test_links["tumblr_link"], "", "bebop")
-        self.assertTrue(os.path.isfile("bebop.jpeg"))
 
     def test_deviantart(self):
         websites.deviantart.download(test_links["deviantart"], "", "oblivion")
@@ -108,10 +100,6 @@ class TestDownloadUnnamed(test_base.EnterTemp):
         self.assertTrue(os.path.isfile("o962.jpeg"))
         self.assertTrue(os.path.isfile("o963.jpeg"))
 
-    def test_tumblr_link(self):
-        websites.tumblr_link.download(test_links["tumblr_link"], "", "")
-        self.assertTrue(os.path.isfile("tumblr_niwgy0oXdq1tv7a6ao1_500.jpeg"))
-
     def test_deviantart(self):
         websites.deviantart.download(test_links["deviantart"], "", "")
         self.assertTrue(os.path.isfile("oblivion_of_mehrunes_by_magusverus.jpeg"))
@@ -145,10 +133,6 @@ class TestDownloadPath(test_base.EnterTemp):
         self.assertTrue(os.path.isfile("sub/anime.1.jpeg"))
         self.assertTrue(os.path.isfile("sub/anime.2.jpeg"))
         self.assertTrue(os.path.isfile("sub/anime.3.jpeg"))
-
-    def test_tumblr_link(self):
-        websites.tumblr_link.download(test_links["tumblr_link"], "sub", "bebop")
-        self.assertTrue(os.path.isfile("sub/bebop.jpeg"))
 
     def test_deviantart(self):
         websites.deviantart.download(test_links["deviantart"], "sub", "oblivion")
