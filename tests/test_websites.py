@@ -31,10 +31,8 @@ class TestMatcher(unittest.TestCase):
         self.assertTrue(websites.deviantart.match(test_links["deviantart"]))
 
     def test_fail(self):
-        self.assertFalse(websites.direct.match(test_links["fail"]))
-        self.assertFalse(websites.imgur_link.match(test_links["fail"]))
-        self.assertFalse(websites.imgur_album.match(test_links["fail"]))
-        self.assertFalse(websites.redditbooru_gallery.match(test_links["fail"]))
+        for downloader in websites.downloaders:
+            self.assertFalse(downloader.match(test_links["fail"]))
 
 
 class TestDownloadNamed(test_base.EnterTemp):
