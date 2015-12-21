@@ -20,9 +20,11 @@ import sys
 import multiprocessing
 import gzip
 import json
+import logging
 from redditcurl import websites
 from redditcurl.exceptions import DownloadError
 from requests.exceptions import RequestException
+from zipfile import BadZipFile
 
 
 # All file names will be translated according to _FILENAME_MAP, in order to remove characters
@@ -59,13 +61,15 @@ def manage_download(url, path, file_name=""):
         True if download was completed successfully.
         Otherwise, False.
     """
+    logger = logging.getLogger("main")
     try:
         for downloader in websites.downloaders:
             if downloader.match(url):
                 downloader.download(url, path, file_name)
                 return url, True
         return url, False
-    except (OSError, IOError, AttributeError, IndexError, ValueError, DownloadError, RequestException):
+    except (OSError, IOError, AttributeError, IndexError, ValueError, DownloadError, RequestException, BadZipFile) as err:
+        logger.info("Error while downloading {} : {}".format(url, str(err)))
         return url, False
 
 
