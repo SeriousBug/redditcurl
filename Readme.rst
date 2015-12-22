@@ -22,8 +22,8 @@ Installation
 ------------
 
 redditcurl is available on the `Python Package Index <https://pypi.python.org/pypi/redditcurl/>`_
-. You can install it via ``pip install redditcurl``. 
-If you are installing from sources instead, you can install it by running ``python setup.py build install``.
+. You can install it via ``pip3 install redditcurl``. 
+If you are installing from sources instead, you can install it by running ``python3 setup.py build install``.
 
 Requirements
 ------------
