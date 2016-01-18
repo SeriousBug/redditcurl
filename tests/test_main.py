@@ -98,7 +98,8 @@ class TestMain(test_base.EnterTemp):
     @mock.patch("redditcurl.__main__.count_success")
     @mock.patch("redditcurl.manager.download_submissions")
     @mock.patch("redditcurl.manager.update_new")
-    def test_main_noauth(self, mocked_update, mocked_download,
+    @mock.patch("redditcurl.websites.shared_config.FILENAME_HASH")
+    def test_main_noauth(self, mocked_filehash, mocked_update, mocked_download,
                          mocked_count, mocked_parser, mocked_environ,
                          mocked_praw, mocked_input):
         # Mock the argument parser
@@ -131,7 +132,8 @@ class TestMain(test_base.EnterTemp):
     @mock.patch("redditcurl.__main__.count_success")
     @mock.patch("redditcurl.manager.download_submissions")
     @mock.patch("redditcurl.manager.update_new")
-    def test_main_auth(self, mocked_update, mocked_download,
+    @mock.patch("redditcurl.websites.shared_config.FILENAME_HASH")
+    def test_main_auth(self, mocked_filehash, mocked_update, mocked_download,
                        mocked_count, mocked_parser, mocked_environ,
                        mocked_praw):
         # Mock the argument parser
@@ -167,7 +169,8 @@ class TestMain(test_base.EnterTemp):
     @mock.patch("redditcurl.__main__.count_success")
     @mock.patch("redditcurl.manager.download_submissions")
     @mock.patch("redditcurl.manager.update_new")
-    def test_main_subs_mp4(self, mocked_update, mocked_download,
+    @mock.patch("redditcurl.websites.shared_config.FILENAME_HASH")
+    def test_main_subs_mp4(self, mocked_filehash, mocked_update, mocked_download,
                            mocked_count, mocked_parser, mocked_environ,
                            mocked_praw):
         # Mock the argument parser
@@ -196,7 +199,7 @@ class TestMain(test_base.EnterTemp):
         # We can't really check the other args
         mdownloaded, mremove, _ = mocked_count.call_args[0]
         self.assertEqual((mdownloaded, mremove), (test_base.test_downloaded, False))
-        # Note that we don't check if redditcurl.websites.shared_config.PREFER_MP4 was set.
+        # Note that we don't check if redditcurl.websites.shared_config.FILENAME_HASH.PREFER_MP4 was set.
         # TODO: It might be a good idea to refactor how configuration should be passed to the
         # downloaders.
 
@@ -206,7 +209,8 @@ class TestMain(test_base.EnterTemp):
     @mock.patch("redditcurl.__main__.count_success")
     @mock.patch("redditcurl.manager.download_submissions")
     @mock.patch("redditcurl.manager.update_new")
-    def test_main_config_error(self, mocked_update, mocked_download,
+    @mock.patch("redditcurl.websites.shared_config.FILENAME_HASH")
+    def test_main_config_error(self, mocked_filehash, mocked_update, mocked_download,
                            mocked_count, mocked_parser, mocked_environ,
                            mocked_praw):
         # Mock the argument parser

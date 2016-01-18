@@ -16,6 +16,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 from redditcurl.exceptions import DownloadError
+from redditcurl.websites import shared_config
+import hashlib
 import requests
 
 _IMAGE_FORMATS = ['bmp', 'dib', 'eps', 'ps', 'gif', 'im', 'jpg', 'jpe', 'jpeg',
@@ -61,8 +63,14 @@ def download(url, path, file_name=""):
         base_name = url.split('/')[-1].split('.')[0]
     else:
         base_name = file_name
+
+    if shared_config.FILENAME_HASH:
+        file_hash = ".{}".format(hashlib.md5(response.content).hexdigest()[:10])
+    else:
+        file_hash = ""
+
     if path == "":
         path = "."
     extension = response.headers["Content-Type"].split('/')[-1]
-    with open("{}/{}.{}".format(path, base_name, extension), mode="wb") as file:
+    with open("{}/{}{}.{}".format(path, base_name, file_hash, extension), mode="wb") as file:
         file.write(response.content)

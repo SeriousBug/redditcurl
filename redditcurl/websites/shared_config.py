@@ -22,3 +22,8 @@
 PREFER_MP4 = False
 # Used by gfycat and imgur_gifv, which by default downloaders will prefer WEBM.
 # If PREFER_MP4 is set to True, they will prefer downloading MP4s instead.
+
+FILENAME_HASH = False
+# Should the file names be appended with the first 10 characters of
+# md5 hash of the file? Required to avoid name collisions, otherwise
+# downloaders may overwrite existing files.

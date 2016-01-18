@@ -21,6 +21,8 @@ from zipfile import ZipFile
 import shutil
 import re
 import os
+import hashlib
+from redditcurl.websites import shared_config
 from redditcurl.exceptions import DownloadError
 
 match = re.compile("imgur.com/a/").search
@@ -51,12 +53,23 @@ def download(url, path, file_name=""):
         file.write(response.content)
         file.seek(0)
         zipfile = ZipFile(file)
-        if file_name == "":
-            zipfile.extractall(path)
+
+        # There can't be files with the same name within the zip, so
+        # we append the hash of the zip file to all files.
+        if shared_config.FILENAME_HASH:
+            file_hash = ".{}".format(hashlib.md5(response.content).hexdigest()[:10])
         else:
-            tempdir = tempfile.mkdtemp()
-            zipfile.extractall(tempdir)
-            for i, image in enumerate(os.listdir(tempdir)):
-                extension = image.split('.')[-1]
-                shutil.copyfile("{}/{}".format(tempdir, image),
-                                "{}/{}.{}.{}".format(path, file_name, i + 1, extension))
+            file_hash = ""
+
+        tempdir = tempfile.mkdtemp()
+        zipfile.extractall(tempdir)
+        for i, image in enumerate(os.listdir(tempdir)):
+            base_name, extension = os.path.splitext(image)
+
+            if file_name == "":
+                new_name = base_name
+            else:
+                new_name = "{}.{}".format(file_name, i + 1)
+
+            shutil.copyfile("{}/{}".format(tempdir, image),
+                            "{}/{}{}{}".format(path, new_name, file_hash, extension))

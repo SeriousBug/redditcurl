@@ -34,7 +34,8 @@ DEFAULTS = {"processes":  "20",
             "prefer-mp4": "false",
             "savefile":   ".downloaded.gz",
             "remove":     "false",
-            "silent":     "false"}
+            "silent":     "false",
+            "nofilehash":   "false"}
 
 OAUTH_DEFAULTS = {"clientid": "Fp9ci3HipOW1FQ",
                   "redirect": "http://kaangenc.me/static/redditcurl.html"}
@@ -65,6 +66,9 @@ def setup_parser():
                         "use the names of downloaded files instead.")
     parser.add_argument("-m", "--prefer-mp4", action="store_true",
                         help="In gfycat and imgur gifv links, download mp4's instead of webm.")
+    parser.add_argument("-e", "--nofilehash", action="store_true",
+                        help="Don't append the first 10 characters of files md5 hash to the file name."
+                        "Older files may get overwritten.")
     parser.add_argument("-f", "--savefile", type=str,
                         help="The file to keep track of images that have been downloaded.")
     parser.add_argument("-r", "--remove", action="store_true",
@@ -197,6 +201,8 @@ def __main__():
             logger.info("Downloading from {}".format(', '.join(subreddits)))
         if conf_r.getboolean("prefer-mp4"):
             shared_config.PREFER_WEBM = False
+        if not conf_r.getboolean("nofilehash"):
+            shared_config.FILENAME_HASH = True
         logger.info("Connecting to Reddit.")
         r = praw.Reddit(user_agent="redditcurl")
         r.set_oauth_app_info(client_id=conf_o.get("clientid"),

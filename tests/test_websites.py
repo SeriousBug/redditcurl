@@ -165,3 +165,16 @@ class TestSharedConfig(test_base.EnterTemp):
     def test_imgur_gifv_mp4(self):
         websites.imgur_gifv.download(test_links["imgur_gifv"], "", "walking penguin")
         self.assertTrue(os.path.isfile("walking penguin.mp4"))
+
+
+    @mock.patch("redditcurl.websites.shared_config.FILENAME_HASH", new=True)
+    def test_direct_filename_hash(self):
+        websites.direct.download(test_links["direct"], ".", "penguin")
+        self.assertTrue(os.path.isfile("penguin.0df2c61816.jpeg"))
+
+    @mock.patch("redditcurl.websites.shared_config.FILENAME_HASH", new=True)
+    def test_imgur_album_filename_hash(self):
+        websites.imgur_album.download(test_links["imgur_album"], "", "penguins")
+        self.assertTrue(os.path.isfile("penguins.1.fd24c4227a.jpg"))
+        self.assertTrue(os.path.isfile("penguins.2.fd24c4227a.jpg"))
+        self.assertTrue(os.path.isfile("penguins.3.fd24c4227a.jpg"))
