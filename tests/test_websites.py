@@ -175,6 +175,6 @@ class TestSharedConfig(test_base.EnterTemp):
     @mock.patch("redditcurl.websites.shared_config.FILENAME_HASH", new=True)
     def test_imgur_album_filename_hash(self):
         websites.imgur_album.download(test_links["imgur_album"], "", "penguins")
-        self.assertTrue(os.path.isfile("penguins.1.fd24c4227a.jpg"))
-        self.assertTrue(os.path.isfile("penguins.2.fd24c4227a.jpg"))
-        self.assertTrue(os.path.isfile("penguins.3.fd24c4227a.jpg"))
+        self.assertTrue(os.path.isfile("penguins.1.caeafd7454.jpg"))
+        self.assertTrue(os.path.isfile("penguins.2.caeafd7454.jpg"))
+        self.assertTrue(os.path.isfile("penguins.3.caeafd7454.jpg"))
