@@ -15,33 +15,14 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
+import re
 from redditcurl.exceptions import DownloadError
 from redditcurl.websites import shared_config
 import hashlib
 import requests
 
-_IMAGE_FORMATS = ['bmp', 'dib', 'eps', 'ps', 'gif', 'im', 'jpg', 'jpe', 'jpeg',
-                  'pcd', 'pcx', 'png', 'pbm', 'pgm', 'ppm', 'psd', 'tif',
-                  'tiff', 'xbm', 'xpm', 'rgb', 'rast', 'svg']
 
-
-def match(url):
-    """Check if the given string leads to an image file.
-
-    The check is done by checking the extension at the end of the string,
-    No check is done to see if file (or page) actually exists, or if it
-    is really an image file.
-
-    Args:
-        url: A file path or url as string.
-
-    Returns:
-        True if the string ends with a known image extension.
-        False otherwise.
-    """
-    if url.split('.')[-1] in _IMAGE_FORMATS:
-        return True
-    return False
+match = re.compile(r"^https?://\S+[.]\S+/\S+[.](bmp|dib|eps|ps|gif|im|jpg|jpe|jpeg|pcd|pcx|png|pbm|pgm|ppm|psd|tif|tiff|xbm|xpm|rgb|rast|svg)(#\S*)?$").search
 
 
 def download(url, path, file_name=""):
